@@ -225,35 +225,55 @@ def try_params(n_iterations,batch_size,fun_shape,em,em_shape,db_path,lr,optimize
 if __name__ == "__main__":
 
     # set up the config and folders
-    cfg = ca.cfg_a1
-    config_name = "cfg_a1"
+    cfg = ca.cfg_a2
+    config_name = "cfg_a2"
     if ca.cfg_a1.training_layers[0]==1:
         em=cfg.em
-    else:
-        em=cfg.em+"_a"
+
 
     if not os.path.exists(cfg.out_path): os.makedirs(cfg.out_path)
-    for lr in cfg.lrs:
-        train_costs = []
-        train_cost_hists = []
-        for i in range(cfg.n_runs):
-            # generate dataset
-            #generate_dataset(cfg.db_path, cfg.genf_shape, cfg.train_samples, cfg.test_samples, noise=cfg.noise)
-            #train_cost,train_cost_hist = try_params(1000,cfg.batch_size,[64,32,1],cfg.db_path,cfg.test_samples, lr=lr)
-            train_cost, train_cost_hist = try_params(n_iterations= cfg.n_iterations,
-                                                     batch_size= cfg.batch_size,
-                                                     fun_shape= cfg.fun_shape,
-                                                     em=em,
-                                                     em_shape=cfg.em_shape,
-                                                     db_path=cfg.db_path, lr=lr, optimizer=cfg.optimizer,scheduler=cfg.scheduler)
-            print ("\n", "train cost", train_cost)
-            train_costs.append(train_cost)
-            train_cost_hists.append(train_cost_hist)
+    if ca.cfg_a1.training_layers[0]==1:
+        em = cfg.em
+        for lr in cfg.lrs:
+            train_costs = []
+            train_cost_hists = []
+            for i in range(cfg.n_runs):
+                # generate dataset
+                # generate_dataset(cfg.db_path, cfg.genf_shape, cfg.train_samples, cfg.test_samples, noise=cfg.noise)
+                # train_cost,train_cost_hist = try_params(1000,cfg.batch_size,[64,32,1],cfg.db_path,cfg.test_samples, lr=lr)
+                train_cost, train_cost_hist = try_params(n_iterations=cfg.n_iterations,
+                                                         batch_size=cfg.batch_size,
+                                                         fun_shape=cfg.fun_shape,
+                                                         em=em,
+                                                         em_shape=cfg.em_shape,
+                                                         db_path=cfg.db_path, lr=lr, optimizer=cfg.optimizer,
+                                                         scheduler=cfg.scheduler)
+                print("\n", "train cost", train_cost)
+                train_costs.append(train_cost)
+                train_cost_hists.append(train_cost_hist)
+    elif ca.cfg_a1.training_layers[1]==1:
+        em = cfg.em + "_a"
+        for lr in cfg.lrs:
+            train_costs = []
+            train_cost_hists = []
+            for i in range(cfg.n_runs):
+                # generate dataset
+                # generate_dataset(cfg.db_path, cfg.genf_shape, cfg.train_samples, cfg.test_samples, noise=cfg.noise)
+                # train_cost,train_cost_hist = try_params(1000,cfg.batch_size,[64,32,1],cfg.db_path,cfg.test_samples, lr=lr)
+                train_cost, train_cost_hist = try_params(n_iterations=cfg.n_iterations,
+                                                         batch_size=cfg.batch_size,
+                                                         fun_shape=cfg.fun_shape,
+                                                         em=em,
+                                                         em_shape=cfg.em_shape,
+                                                         db_path=cfg.db_path, lr=lr, optimizer=cfg.optimizer,
+                                                         scheduler=cfg.scheduler)
+                print("\n", "train cost", train_cost)
+                train_costs.append(train_cost)
+                train_cost_hists.append(train_cost_hist)
 
-        train_costs = np.asarray(train_costs)
-        train_cost_hists = np.asarray(train_cost_hists)
-        train_cost_hist = np.mean(train_cost_hists,axis=0)
-        np.savetxt(os.path.join(cfg.out_path,config_name + "_train_cost_hist_lr_" + str(lr)),train_cost_hist)
-
+    train_costs = np.asarray(train_costs)
+    train_cost_hists = np.asarray(train_cost_hists)
+    train_cost_hist = np.mean(train_cost_hists, axis=0)
+    np.savetxt(os.path.join(cfg.out_path, config_name + "_train_cost_hist_lr_" + str(lr)), train_cost_hist)
 
 
