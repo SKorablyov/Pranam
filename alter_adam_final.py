@@ -114,18 +114,30 @@ def schwefel(x, xmin=-1, xmax=1):
     return result
 
 def perceptron_embedding1(sizes,sess,coord):
+
     # init network (first 2 layers)
     # fixme changed the original implementation
+    """
+    em_shapes == sizes 256 x 256
+    """
+
     Ws = []
     top_layer = tf.get_variable("perc_embed_pc",
                                 shape=[sizes[0],sizes[1]],
                                 initializer=tf.contrib.layers.xavier_initializer())
     Ws.append(top_layer)
-    for i in range(1, len(sizes) - 1):
+
+    """
+    Ws==[256x256]
+    """
+    print(Ws)
+    print(top_layer)
+    for i in range(1, len(sizes)-1):
         name = "perceptron_fc_pc" + str(i)
         shape = [sizes[i],sizes[i+1]]
         w = tf.get_variable(name, shape=shape, initializer=tf.contrib.layers.xavier_initializer())
         top_layer = tf.nn.relu(tf.matmul(top_layer,w))
+        print(top_layer)
         Ws.append(w)
     return top_layer,Ws
 
@@ -140,6 +152,11 @@ def perceptron_embedding12(sizes,sess,coord):
 
 
     return top_layer,Ws
+
+
+def perceptron_embedding3(sizes,sess,coord):
+    return
+
 
 def perceptron_embedding2(sizes,sess,coord):
     Ws = []
@@ -287,26 +304,14 @@ def net3_embed(X, fun_shape, em, em_shape, sess, coord, tl,em_dif):
             elif em_dif==2:em_str="actcentron_embedding"
             em_1 = str(em_str) + "1"
             W1, PWs = eval(em_1)(em_shape, sess=sess, coord=coord)
-            W1 = tf.reshape(W1, [1, em_shape[0], fun_shape[0], fun_shape[1]])
+            W1 = tf.reshape(W1, [1, em_shape[2], fun_shape[0], fun_shape[1]])
             l1 = tf.reduce_sum(tf.expand_dims(l0, 3) * W1, axis=2)
             l1_act = tf.nn.relu(l1)
-            if tl[1] == 1:
-                if em_dif == 1:
-                    em_str = "actcentron_embedding"
-                elif em_dif == 2:
-                    em_str = "perceptron_embedding"
-                em_1 = str(em_str) + "12"
-                em_shape_1 = em_shape
-                em_shape_1[1] = fun_shape[1] * fun_shape[2]
-                W2, _ = eval(em_1)(em_shape_1, sess=sess, coord=coord)
-                W2 = tf.reshape(W2, [1, em_shape_1[0], fun_shape[1], fun_shape[2]])
-                l2 = tf.reduce_sum(tf.expand_dims(l1_act, 3) * W2, axis=2)
-                l2_act = tf.nn.relu(l2)
-            else:
-                W2 = tf.get_variable("W2", shape=[em_shape[0], fun_shape[0], fun_shape[1]],
-                                     initializer=tf.contrib.layers.xavier_initializer(), trainable=False)
-                l2 = tf.reduce_sum(tf.expand_dims(l1_act, 3) * W2, axis=2)
-                l2_act = tf.nn.relu(l2)
+            W2 = tf.get_variable("W2", shape=[em_shape[0], fun_shape[0], fun_shape[1]],
+                                 initializer=tf.contrib.layers.xavier_initializer(), trainable=True)
+            l2 = tf.reduce_sum(tf.expand_dims(l1_act, 3) * W2, axis=2)
+            l2_act = tf.nn.relu(l2)
+
 
         else:
             em_1 = str(em_str) + "2"
@@ -327,12 +332,35 @@ def net3_embed(X, fun_shape, em, em_shape, sess, coord, tl,em_dif):
 
 
 
+
+
         W3 = tf.get_variable("W3", shape=[fun_shape[2], fun_shape[3]],
                          initializer=tf.contrib.layers.xavier_initializer(),trainable=y)
         l3 = tf.reduce_sum(tf.expand_dims(l2_act, 3) * W3, axis=2)
         return X, l3, PWs + [W1,W2,W3]
+"""
 
+def net3_embed(X, fun_shape, em, em_shape, sess, coord, tl,em_dif):
+    l0 = tf.expand_dims(X, 1)
+    W1 = tf.get_variable("W1", shape=[em_shape[0], fun_shape[0], fun_shape[1]],
+                         initializer=tf.contrib.layers.xavier_initializer(), trainable=True)
+    PWs = []
+    PWs.append(W1)
+    l1 = tf.reduce_sum(tf.expand_dims(l0, 3) * W1, axis=2)
+    l1_act = tf.nn.relu(l1)
 
+    em_shape_1 = em_shape
+    em_shape_1[1] = fun_shape[1] * fun_shape[2]
+    W2 = tf.get_variable("W2", shape=[em_shape[0], fun_shape[0], fun_shape[1]],
+                         initializer=tf.contrib.layers.xavier_initializer(), trainable=True)
+    l2 = tf.reduce_sum(tf.expand_dims(l1_act, 3) * W2, axis=2)
+    l2_act = tf.nn.relu(l2)
+
+    W3 = tf.get_variable("W3", shape=[fun_shape[2], fun_shape[3]],
+                         initializer=tf.contrib.layers.xavier_initializer(), trainable=False)
+    l3 = tf.reduce_sum(tf.expand_dims(l2_act, 3) * W3, axis=2)
+    return X, l3, PWs + [W1, W2, W3]
+"""
 def _try_params(n_iterations,batch_size,fun_shape,em,em_shape,db_path,lr,optimizer,scheduler,net3,tl,em_dif):
     "try some parameters, report testing accuracy with square loss"
     # read data
@@ -341,7 +369,7 @@ def _try_params(n_iterations,batch_size,fun_shape,em,em_shape,db_path,lr,optimiz
     # initialize session
     sess = tf.Session()
     coord = tf.train.Coordinator()
-    _,yhat_train,Ws = eval(net3)(X=x_train,fun_shape=fun_shape,em=em,em_shape=em_shape,sess=sess,coord=coord,tl=tl,em_dif=em_dif)
+    _,yhat_train,_ = eval(net3)(X=x_train,fun_shape=fun_shape,em=em,em_shape=em_shape,sess=sess,coord=coord,tl=tl,em_dif=em_dif)
     if batch_size!=1:
         y_diff = tf.expand_dims(y_train, 1) - yhat_train
 
@@ -354,8 +382,6 @@ def _try_params(n_iterations,batch_size,fun_shape,em,em_shape,db_path,lr,optimiz
         train_loss=tf.reduce_sum(train_loss_tensor)
         train_loss=tf.negative(train_loss)
         print(train_loss)
-
-
 
     lr_current = tf.placeholder(tf.float32)
     train_step = eval(optimizer)(learning_rate=lr_current).minimize(train_loss)
@@ -416,7 +442,7 @@ if __name__ == "__main__":
           # set up the config and folders
           machine = socket.gethostname()
           cfg = ca.cfg4_39
-          config_name=cfg.name+"1"
+          config_name=cfg.name
           counter=-1
           tl=cfg.training_layers
           #em_dif_list_2=["cfg4_44","cfg4_45","cfg_mnist_a32"]
