@@ -459,7 +459,7 @@ class cfg_mnist_2:
     n_iterations = 100000
     batch_size = 100
     fun_shape = [784, 128, 64, 10]
-    em_shape = [1, 8192]
+    em_shape = [256, 8192]
 
     optimizer = "tf.train.GradientDescentOptimizer"
     scheduler = "none"
