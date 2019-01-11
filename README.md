@@ -1,4 +1,4 @@
-# Nonocovex optimization
+# Nonconvex optimization
 polynoms.py - training 3-layer fully-connected network for non-convex functions optimization
 
 
