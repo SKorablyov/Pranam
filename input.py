@@ -1,4 +1,12 @@
+import tensorflow as tf
+import numpy as np
+import time, os, sys, socket
+
+from keras.datasets import mnist  # subroutines for fetching the MNIST dataset
+from keras.utils import np_utils  # utilities for one-hot encoding of ground truth values
+
 def hierarchical_compositional(genf_shape, n_samples, W=None, noise=None):
+
     "generate a bunch of samples, the activation function is frozen as relu"
     X = np.matrix(np.asarray(np.random.uniform(size=[n_samples, genf_shape[0]])))
     lastX = X

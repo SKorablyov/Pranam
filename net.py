@@ -1,3 +1,4 @@
+import tensorflow as tf
 
 def perceptron_embedding(sizes, sess, coord):
     # init network (first 2 layers)
@@ -48,26 +49,7 @@ def net3_embed(X, fun_shape, em_shape, sess, coord, tl):
 def test_accuracy(X, x_test,y_test,em_shape,sess, coord):
 
  
-    l0 = tf.expand_dims(x_test, 1)
-    W1 = X[0]
-    l1 = tf.reduce_sum(tf.expand_dims(l0, 3) * W1, axis=2)
-    l1_act = tf.nn.relu(l1)
-    W2 = X[1]
-    l2 = tf.reduce_sum(tf.expand_dims(l1_act, 3) * W2, axis=2)
-    l2_act = tf.nn.relu(l2)
-    W3 = X[2]
-    yhat_train = tf.reduce_sum(tf.expand_dims(l2_act, 3) * W3, axis=2)
-    y_ = tf.expand_dims(y_test, 1)
-    y__=y_
 
-    for i in range(em_shape[0]-1):
-
-        y__=tf.concat([y__,y_],axis=1)
-
-    yhat_predicted=tf.nn.softmax(yhat_train)
-
-    correct_prediction = tf.equal(tf.argmax(yhat_predicted, 2), tf.argmax(y__, 2))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     return accuracy
 
 """
@@ -78,8 +60,6 @@ def test_accuracy(X, x_test,y_test,em_shape,sess, coord):
     else:
         y = False
 
-   # W1 = tf.get_variable("W1", shape=[ fun_shape[0], fun_shape[1]],
-    #                     initializer=tf.contrib.layers.xavier_initializer(), trainable=y)
     W1 = tf.get_variable("W1", shape=[fun_shape[0], fun_shape[1]],
                          initializer=tf.contrib.layers.xavier_initializer(), trainable=y)
     l1 = tf.reduce_sum(tf.expand_dims(l0, 3) * W1, axis=2)

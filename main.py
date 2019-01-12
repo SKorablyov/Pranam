@@ -1,9 +1,11 @@
 import time, os, sys, socket
 import tensorflow as tf
 import numpy as np
-import config_2vs3l_emb as conf
-from keras.datasets import mnist  # subroutines for fetching the MNIST dataset
-from keras.utils import np_utils  # utilities for one-hot encoding of ground truth values
+import config as conf
+from input import read_dataset
+from input import generate_dataset
+from net import net3_embed
+
 
 
 def _try_params(n_iterations, batch_size, fun_shape, em_shape, db_path, lr, optimizer, scheduler, net3, tl,counter):
@@ -15,22 +17,42 @@ def _try_params(n_iterations, batch_size, fun_shape, em_shape, db_path, lr, opti
     sess = tf.Session()
     coord = tf.train.Coordinator()
     _, yhat_train, X = eval(net3)(X=x_train, fun_shape=fun_shape, em_shape=em_shape, sess=sess, coord=coord, tl=tl)
-
+    #find accuracy om train data
     y_ = tf.expand_dims(y_train, 1)
+    y__=y_
+    for i in range(em_shape[0]-1):
+
+        y__=tf.concat([y__,y_],axis=1)
+    yhat_predicted = tf.nn.softmax(yhat_train)
+
+    correct_prediction = tf.equal(tf.argmax(yhat_predicted, 2), tf.argmax(y__, 2))
+    acc = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+    #find loss
+    train_loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=yhat_train, labels=y__)
+
+    #find accuracy on test data
+    l0 = tf.expand_dims(x_test, 1)
+    W1 = X[0]
+    l1 = tf.reduce_sum(tf.expand_dims(l0, 3) * W1, axis=2)
+    l1_act = tf.nn.relu(l1)
+    W2 = X[1]
+    l2 = tf.reduce_sum(tf.expand_dims(l1_act, 3) * W2, axis=2)
+    l2_act = tf.nn.relu(l2)
+    W3 = X[2]
+    yhat_train = tf.reduce_sum(tf.expand_dims(l2_act, 3) * W3, axis=2)
+    y_ = tf.expand_dims(y_test, 1)
     y__=y_
 
     for i in range(em_shape[0]-1):
 
         y__=tf.concat([y__,y_],axis=1)
 
-    train_loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=yhat_train, labels=y__)
+    yhat=tf.nn.softmax(yhat_train)
 
-    yhat_predicted=tf.nn.softmax(yhat_train)
+    correct_test_prediction = tf.equal(tf.argmax(yhat, 2), tf.argmax(y__, 2))
+    test_acc_ = tf.reduce_mean(tf.cast(correct_test_prediction, tf.float32))
 
-    correct_prediction = tf.equal(tf.argmax(yhat_predicted, 2), tf.argmax(y__, 2))
-    acc = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-
-    test_acc_ = test_accuracy(X=X, x_test=x_test, y_test=y_test, em_shape=em_shape, sess=sess, coord=coord)
 
 
     lr_current = tf.placeholder(tf.float32)

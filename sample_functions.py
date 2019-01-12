@@ -1,3 +1,5 @@
+import tensorflow as tf
+
 def rescale(x, a, b, c, d):
     """
     Rescales variable from [a, b] to [c, d]
