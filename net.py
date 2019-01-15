@@ -21,9 +21,11 @@ def perceptron_embedding(sizes, sess, coord):
         top_layer = tf.matmul(top_layer, w)
         if i < (len(sizes) - 2):
             top_layer = tf.nn.relu(top_layer)
+
     # rescale with tg activation
     sess.run(tf.global_variables_initializer())  # FIXME: I need to initialize each of the weights !
     scaling = 1.7159 / tf.maximum(tf.abs(tf.reduce_max(top_layer)), tf.abs(tf.reduce_min(top_layer)))
+
     scaling_const = sess.run(scaling)
     a_ = [1.0]
     a = tf.get_variable("a", dtype=tf.float32, initializer=tf.constant(a_), trainable=True)
@@ -31,7 +33,6 @@ def perceptron_embedding(sizes, sess, coord):
     b_ = [0.01]
     b = tf.get_variable("b", dtype=tf.float32, initializer=tf.constant(b_), trainable=True)
     out = tf.multiply(out, b)
-
     return out
 
 

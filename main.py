@@ -53,8 +53,6 @@ def _try_params(n_iterations, batch_size, fun_shape, em_shape, db_path, lr, opti
     correct_test_prediction = tf.equal(tf.argmax(yhat, 2), tf.argmax(y__, 2))
     test_acc_ = tf.reduce_mean(tf.cast(correct_test_prediction, tf.float32))
 
-
-
     lr_current = tf.placeholder(tf.float32)
     train_step = eval(optimizer)(learning_rate=lr_current).minimize(train_loss)
 
