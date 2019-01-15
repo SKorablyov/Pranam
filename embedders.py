@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 class FCEmbedder:
-    def __init__(self,sess,variables,gradients,embed_shape):
+    def __init__(self,sess,variables,gradients,embed_shape,initializers):
         """
         :param variables: 2D array of variables to embed
         :param gradients: 2D array of gradients for the varibles to embed
@@ -18,19 +18,18 @@ class FCEmbedder:
 
         # build embedding
         input = tf.range(0, embed_shape[0])
-        embed_params = tf.get_variable("FCEmbed_0", #shape=[embed_shape[0], embed_shape[1]],
-                                       initializer=np.asarray(np.random.normal(size=[embed_shape[0],embed_shape[1]]),np.float32))
-                                      # fixme !!!!!!!tf.contrib.layers.xavier_initializer()
+        embed_params = tf.get_variable("FCEmbed_0", shape=[embed_shape[0], embed_shape[1]],
+                                       initializer=initializers[0])
         top_layer = tf.nn.embedding_lookup(params=embed_params, ids=input)
         for i in range(1, len(embed_shape) - 1):
-            w = tf.get_variable("FCEmbed_" + str(i), #shape=[embed_shape[i], embed_shape[i + 1]],
-                                initializer=tf.random_uniform(shape=[embed_shape[i], embed_shape[i + 1]]))
-            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!fixme#tf.contrib.layers.xavier_initializer())
+            w = tf.get_variable("FCEmbed_" + str(i), shape=[embed_shape[i], embed_shape[i + 1]],
+                                initializer=initializers[i])
+
             top_layer = tf.matmul(top_layer, w)
             if i < (len(embed_shape) - 2):
                 top_layer = tf.nn.relu(top_layer)
         # rescale with tg activation
-        sess.run(tf.global_variables_initializer())  # FIXME: I need to initialize each of the weights separately !
+        sess.run(tf.global_variables_initializer())  # FIXME: I need to initialize each of the weights separately !!!!!!!
         scaling = 1.7159 / tf.maximum(tf.abs(tf.reduce_max(top_layer)), tf.abs(tf.reduce_min(top_layer)))
         scaling_const = sess.run(scaling)
 #        a_var = tf.get_variable("FCEmbed_a", dtype=tf.float32, shape=[], initializer=tf.constant_initializer(1.0))

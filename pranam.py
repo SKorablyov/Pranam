@@ -43,24 +43,33 @@ class GradientAccumulator:
 
         # create options to either merge or apply gradient depending on the step
         def _merge_grad(gradients=gradients,grad_accum=grad_accum):
-            assign_ops = []
+            adgrad_ops = []
             for i in range(len(gradients)):
                 if grad_accum[i] is not None:
-                    assign_ops.append(tf.assign(grad_accum[i], grad_accum[i] + gradients[i]))
-            with tf.control_dependencies(assign_ops):
+                    adgrad_ops.append(tf.assign(grad_accum[i], grad_accum[i] + gradients[i]))
+            with tf.control_dependencies(adgrad_ops):
                 step_done = tf.constant(0)
             return step_done
 
-        def _apply_grad(grad_accum=grad_accum, assign_vals=self.assign_vals, optim=self.optim,
+        def _merge_apply_grad(grad_accum=grad_accum, assign_vals=self.assign_vals, optim=self.optim,
                         trainable_vars=self.trainable_vars, b_size=batch_size):
             nvars = len(trainable_vars)
-            # compute gradient averages
-            grad_ave = []
-            for i in range(len(grad_accum)):
+
+            # merge gradient from this batch
+            adgrad_ops = []
+            for i in range(len(gradients)):
                 if grad_accum[i] is not None:
-                    grad_ave.append(grad_accum[i] / b_size)
-                else:
-                    grad_ave.append(None)
+                    adgrad_ops.append(tf.assign(grad_accum[i], grad_accum[i] + gradients[i]))
+
+            # compute gradient averages
+            with tf.control_dependencies(adgrad_ops):
+                grad_ave = []
+                for i in range(len(grad_accum)):
+                    if grad_accum[i] is not None:
+                        grad_ave.append(grad_accum[i] / b_size)
+                    else:
+                        grad_ave.append(None)
+
             apply_grad = optim.apply_gradients(zip(grad_ave, trainable_vars))
             # flush gradient accumulator
             assign_zero = []
@@ -75,7 +84,7 @@ class GradientAccumulator:
                 step_done = tf.constant(1)
             return step_done
 
-        apply_gradient = tf.cond(remainder, true_fn=_apply_grad, false_fn=_merge_grad)
+        apply_gradient = tf.cond(remainder, true_fn=_merge_apply_grad, false_fn=_merge_grad)
         return apply_gradient
 
 
