@@ -41,6 +41,38 @@ def network(net_pars):
     return cost, [tf.reduce_sum(cost)]
 
 
+def rescale(x, a, b, c, d):
+    """
+    Rescales variable from [a, b] to [c, d]
+    """
+    return c + ((d - c) / (b - a)) * (x - a)
+
+
+# def schwefel(x, xmin=-1, xmax=1):
+#     """
+#     https://www.sfu.ca/~ssurjano/schwef.html
+#     """
+#     x = rescale(x, xmin, xmax, -500, 500)
+#     result = 418.9829 * tf.to_float(tf.shape(x)[1]) - tf.reduce_sum(tf.sin(tf.abs(x)**0.5) * x,axis=1)
+#     return result
+
+def schwefel(x, xmin=-1, xmax=1):
+    """
+    https://www.sfu.ca/~ssurjano/schwef.html
+    """
+    x = rescale(x, xmin, xmax, -500, 500)
+    result = 418.9829 * tf.to_float(tf.shape(x)[0]) - tf.reduce_sum(tf.sin(tf.abs(x)**0.5) * x)
+    return result
+
+
+def schwefel_net(dim=10):
+    guess = tf.get_variable(name="schnet_guess",shape=[dim],initializer=tf.random_uniform_initializer())
+    cost = schwefel(guess)
+    return cost,[cost]
+
+
+
+
 
 class FCEmbedder:
     def __init__(self,sess,variables,gradients,embed_shape):
@@ -55,15 +87,18 @@ class FCEmbedder:
         embed_shape[0] = len(variables)
         varshapes = [np.asarray(v.get_shape().as_list()) for v in variables[0]]
         embed_shape[-1] = int(np.sum([np.prod(shape) for shape in varshapes]))
+        print "initialized FC embedding with of shape",embed_shape
 
         # build embedding
         input = tf.range(0, embed_shape[0])
-        embed_params = tf.get_variable("FCEmbed_0", shape=[embed_shape[0], embed_shape[1]],
-                                       initializer=tf.contrib.layers.xavier_initializer())
+        embed_params = tf.get_variable("FCEmbed_0", #shape=[embed_shape[0], embed_shape[1]],
+                                       initializer=np.asarray(np.random.normal(size=[embed_shape[0],embed_shape[1]]),np.float32))
+                                      # fixme !!!!!!!tf.contrib.layers.xavier_initializer()
         top_layer = tf.nn.embedding_lookup(params=embed_params, ids=input)
         for i in range(1, len(embed_shape) - 1):
-            w = tf.get_variable("FCEmbed_" + str(i), shape=[embed_shape[i], embed_shape[i + 1]],
-                                initializer=tf.contrib.layers.xavier_initializer())
+            w = tf.get_variable("FCEmbed_" + str(i), #shape=[embed_shape[i], embed_shape[i + 1]],
+                                initializer=tf.random_uniform(shape=[embed_shape[i], embed_shape[i + 1]]))
+            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!fixme#tf.contrib.layers.xavier_initializer())
             top_layer = tf.matmul(top_layer, w)
             if i < (len(embed_shape) - 2):
                 top_layer = tf.nn.relu(top_layer)
@@ -71,9 +106,10 @@ class FCEmbedder:
         sess.run(tf.global_variables_initializer())  # FIXME: I need to initialize each of the weights separately !
         scaling = 1.7159 / tf.maximum(tf.abs(tf.reduce_max(top_layer)), tf.abs(tf.reduce_min(top_layer)))
         scaling_const = sess.run(scaling)
-        a_var = tf.get_variable("FCEmbed_a", dtype=tf.float32, shape=[], initializer=tf.constant_initializer(1.0))
-        b_var = tf.get_variable("FCEmbed_b", dtype=tf.float32, shape=[], initializer=tf.constant_initializer(0.001))
-        embedding_output = b_var * tf.nn.tanh(tf.multiply(scaling_const * top_layer, a_var))
+#        a_var = tf.get_variable("FCEmbed_a", dtype=tf.float32, shape=[], initializer=tf.constant_initializer(1.0))
+#        b_var = tf.get_variable("FCEmbed_b", dtype=tf.float32, shape=[], initializer=tf.constant_initializer(0.001))
+#        embedding_output = b_var * tf.nn.tanh(tf.multiply(scaling_const * top_layer, a_var))
+        embedding_output = tf.nn.tanh(scaling_const * top_layer)
 
         # compute the gradient on embedding
         input_gradients = []
@@ -180,8 +216,8 @@ class GradientAccumulator:
 
 
 class PranamOptimizer:
-    def __init__(self, sess, func, func_pars, num_clones=16, optimizer=tf.train.AdamOptimizer,batch_size=100,
-                 embed_vars=None, embedder=FCEmbedder, embedder_pars=[[None,None]]):
+    def __init__(self, sess, func, func_pars, num_clones=16, optimizer=tf.train.AdamOptimizer,learning_rate=1e-5,
+                 batch_size=100, embed_vars=None, embedder=FCEmbedder, embedder_pars=[[None,None]]):
 
         # call function num_clones times, and get a loss to optimize
         costs = []
@@ -192,7 +228,7 @@ class PranamOptimizer:
                 costs.append(cost)
                 self.metrics.append(metric)
         cost_mean = tf.reduce_mean(tf.stack(costs,axis=0))
-        optim = optimizer() # todo pass pars
+        optim = optimizer(learning_rate=learning_rate) # todo pass pars
 
         # sort coupled and decoupled variables
         decoupled_grads = []
@@ -246,8 +282,17 @@ class PranamOptimizer:
 
 
 sess = tf.Session()
-optimizer = PranamOptimizer(sess=sess,func=network,func_pars=[0],embed_vars=["a:0","b:0"],batch_size=5)
-train_op,metrics = optimizer.train_step()
+# test regular gradient convergence
+#optimizer = PranamOptimizer(sess=sess,func=network,func_pars=[0],embed_vars=["a:0","b:0"],batch_size=5)
+
+opt = PranamOptimizer(sess=sess,func=schwefel_net,num_clones=256,optimizer=tf.train.GradientDescentOptimizer,
+                      func_pars=[10],embed_vars=None,batch_size=1,
+                      embedder_pars=[[None,256,None]],learning_rate=4e-6)
+
+
+
+
+train_op,metrics = opt.train_step()
 cost_mean = tf.reduce_mean(metrics[0],axis=0)
 
 sess.run(tf.global_variables_initializer()) # fixme only initialize not initialized variables
