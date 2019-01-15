@@ -12,9 +12,5 @@ config_2vs3l_emb.py - contains information about network and embedding configura
 
 
 
-BUG with python 2.x
-
-
-when run aam.py wiht cfg_mnist_2 it makes some accuracies zeros  
 
 
