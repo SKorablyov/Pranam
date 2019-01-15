@@ -48,10 +48,10 @@ import tensorflow as tf
 # grads_and_vars2 = [gv for gv in grads_and_vars if gv[0] is not None]
 
 
-add = tf.add_n([tf.Variable([10,11,12]),tf.Variable([1000,11,12])])
-
-
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
-
-print sess.run(add)
+# add = tf.add_n([tf.Variable([10,11,12]),tf.Variable([1000,11,12])])
+#
+#
+# sess = tf.Session()
+# sess.run(tf.global_variables_initializer())
+#
+# print sess.run(add)
