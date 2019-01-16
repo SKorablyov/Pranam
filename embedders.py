@@ -28,10 +28,6 @@ class FCEmbedder:
             if i < (len(embed_shape) - 2):
                 top_layer = acts[i-1](top_layer)
         top_layer = acts[len(embed_shape) - 2](top_layer)
-        #embedding_output = top_layer
-        # scaled tanh
-        #embedding_output = scaled_tanh(sess, top_layer, learnable_tanh)
-        # embedding_output = tf.nn.tanh(top_layer)
 
         # compute the gradient on embedding
         input_gradients = []

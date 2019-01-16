@@ -91,3 +91,4 @@ def read_dataset(db_path, batch_size):
     x_test, y_test = tf.train.slice_input_producer([X_test, Y_test])
     x_test, y_test = tf.train.batch([x_test, y_test], batch_size)
     return x_train, y_train, x_test, y_test
+

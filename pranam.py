@@ -115,7 +115,8 @@ class PranamOptimizer:
 
         for grad, var in optim.compute_gradients(loss=cost_mean):
             clone_num = int(var.name.split("/")[0][6:])
-            var_name = "/".join(var.name.split("/")[1:])
+            var_name = str("/".join(var.name.split("/")[1:]))
+            #print var_name,embed_vars
 
             if (grad is not None):
                 if ((embed_vars is None) or (var_name in embed_vars)):
