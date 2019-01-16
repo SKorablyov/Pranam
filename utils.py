@@ -39,7 +39,6 @@ class TrainingMonitor:
         return str(key) + ": " + str(value) + "\tave:" + str(self._averages[key][-1]) + "\t"
 
     def add_many(self, prefix, val_dict, b_num):
-        # tm.add_many(prefix=train, val_dict=_train_out, b_num)
         for key, value in val_dict.iteritems():
             self.add(key=(prefix + key), value=value, b_num=b_num)
 
@@ -54,6 +53,7 @@ class TrainingMonitor:
         # block further addition of new variables
         self.add_lock = True
         # compute average/min/max values for all keys
+        print "b_num:",  self._b_nums.values()[0][-1],
         for key in self._records:
             print key, #self._records[key][-1],
             print "ave:", "%.3f" % self._averages[key][-1],

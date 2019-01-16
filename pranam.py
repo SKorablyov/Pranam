@@ -97,10 +97,6 @@ class PranamOptimizer:
         self.metrics = []
         for i in range(num_clones):
             with tf.variable_scope("clone_" + str(i)):
-
-                #print func_pars
-                #time.sleep(1000)
-
                 cost, metric = func(*func_pars)
                 costs.append(cost)
                 self.metrics.append(metric)
@@ -116,7 +112,6 @@ class PranamOptimizer:
         for grad, var in optim.compute_gradients(loss=cost_mean):
             clone_num = int(var.name.split("/")[0][6:])
             var_name = str("/".join(var.name.split("/")[1:]))
-            #print var_name,embed_vars
 
             if (grad is not None):
                 if ((embed_vars is None) or (var_name in embed_vars)):

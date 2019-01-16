@@ -46,6 +46,7 @@ class cfg3:
         self.optimizer = tf.train.GradientDescentOptimizer
         self.learning_rate = 1e-5
         self.batch_size = 2
+        self.num_epochs = 50
         # embedding pars
         self.embed_vars = ["mnist_fcnet/w2:0"]
         self.embedder = embedders.FCEmbedder
@@ -54,5 +55,4 @@ class cfg3:
         scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=0.01, train_b=False).doit
         embedding_acts = [tf.nn.relu, scaled_tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts]
-
 
