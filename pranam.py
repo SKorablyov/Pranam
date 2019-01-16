@@ -97,6 +97,10 @@ class PranamOptimizer:
         self.metrics = []
         for i in range(num_clones):
             with tf.variable_scope("clone_" + str(i)):
+
+                #print func_pars
+                #time.sleep(1000)
+
                 cost, metric = func(*func_pars)
                 costs.append(cost)
                 self.metrics.append(metric)

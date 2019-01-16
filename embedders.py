@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 class FCEmbedder:
-    def __init__(self,sess,variables,gradients,embed_shape,initializers):
+    def __init__(self,sess,variables,gradients,embed_shape,initializers,acts):
         """
         :param variables: 2D array of variables to embed
         :param gradients: 2D array of gradients for the varibles to embed
@@ -24,25 +24,21 @@ class FCEmbedder:
         for i in range(1, len(embed_shape) - 1):
             w = tf.get_variable("FCEmbed_" + str(i), shape=[embed_shape[i], embed_shape[i + 1]],
                                 initializer=initializers[i])
-
             top_layer = tf.matmul(top_layer, w)
             if i < (len(embed_shape) - 2):
-                top_layer = tf.nn.relu(top_layer)
-        # rescale with tg activation
-        sess.run(tf.global_variables_initializer())  # FIXME: I need to initialize each of the weights separately !!!!!!!
-        scaling = 1.7159 / tf.maximum(tf.abs(tf.reduce_max(top_layer)), tf.abs(tf.reduce_min(top_layer)))
-        scaling_const = sess.run(scaling)
-#        a_var = tf.get_variable("FCEmbed_a", dtype=tf.float32, shape=[], initializer=tf.constant_initializer(1.0))
-#        b_var = tf.get_variable("FCEmbed_b", dtype=tf.float32, shape=[], initializer=tf.constant_initializer(0.001))
-#        embedding_output = b_var * tf.nn.tanh(tf.multiply(scaling_const * top_layer, a_var))
-        embedding_output = tf.nn.tanh(scaling_const * top_layer)
+                top_layer = acts[i-1](top_layer)
+        top_layer = acts[len(embed_shape) - 2](top_layer)
+        #embedding_output = top_layer
+        # scaled tanh
+        #embedding_output = scaled_tanh(sess, top_layer, learnable_tanh)
+        # embedding_output = tf.nn.tanh(top_layer)
 
         # compute the gradient on embedding
         input_gradients = []
         for grads in gradients:
             input_gradients.append(tf.concat([tf.reshape(g,[-1]) for g in grads],axis=0))
         input_gradients = tf.stack(input_gradients,axis=0)
-        embedding_loss = (embedding_output - tf.stop_gradient(embedding_output) + tf.stop_gradient(input_gradients))**2
+        embedding_loss = (top_layer - tf.stop_gradient(top_layer) + tf.stop_gradient(input_gradients))**2
         optim = tf.train.GradientDescentOptimizer(0.01) # todo this is a trick to get gradients; rewrite cleaner
         self.embedding_grads = []
         self.embedding_vars = []
@@ -57,9 +53,9 @@ class FCEmbedder:
         self.embedded_variables = [[] for _ in range(embed_shape[0])]
         for clone_num in range(embed_shape[0]):
             for var_num in range(len(varshapes)):
-                sl = [slices[var_num][0],slices[var_num][1]]
-                embedded_var = tf.slice(embedding_output[clone_num,:],[sl[0]],[sl[1]])
-                embedded_var = tf.reshape(embedded_var,varshapes[var_num])
+                sl = [slices[var_num][0], slices[var_num][1]]
+                embedded_var = tf.slice(top_layer[clone_num,:],[sl[0]],[sl[1]])
+                embedded_var = tf.reshape(embedded_var, varshapes[var_num])
                 self.embedded_variables[clone_num].append(embedded_var)
 
     def compute_gradients(self):

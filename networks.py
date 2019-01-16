@@ -39,4 +39,4 @@ def nonconvex_net(dim=10,function="_schwefel"):
 
     guess = tf.get_variable(name="schnet_guess",shape=[dim],initializer=tf.random_uniform_initializer())
     cost = eval(function)(guess)
-    return cost,[cost]
+    return cost,[cost,guess]
