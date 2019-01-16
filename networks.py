@@ -69,22 +69,17 @@ def mnist_fcnet(b_size=1):
         w2 = tf.get_variable("w2", shape=[128, 64], initializer=tf.truncated_normal_initializer)
         w3 = tf.get_variable("w3", shape=[64, 10], initializer=tf.truncated_normal_initializer)
 
-
-    # print w2.name
-    # time.sleep(1000)
-
     # build network
-    tr_input = tf.reshape(b_trX, [1, -1])
+    tr_input = tf.reshape(b_trX, [b_size, -1])
     tr_logits = tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tr_input, w1)), w2)), w3)
     tr_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=tr_logits, labels=b_trY)
-    tr_preds = tf.argmax(tf.nn.softmax(tr_logits), axis=1)
-    tr_acc = tf.reduce_mean(tf.to_float(tr_preds == b_trY))
-
-    te_input = tf.reshape(b_teX, [1, -1])
+    tr_preds = tf.one_hot(tf.argmax(tf.nn.softmax(tr_logits), axis=1), 10,dtype=tf.float32)
+    tr_acc = tf.reduce_mean(tf.reduce_sum(tf.one_hot(b_trY,10,dtype=tf.float32) * tr_preds,axis=1),axis=0)
+    te_input = tf.reshape(b_teX, [b_size, -1])
     te_logits = tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(te_input, w1)), w2)), w3)
     te_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=te_logits, labels=b_teY)
-    te_preds = tf.argmax(tf.nn.softmax(te_logits), axis=1)
-    te_acc = tf.reduce_mean(tf.to_float(te_preds == b_teY))
+    te_preds = tf.one_hot(tf.argmax(tf.nn.softmax(te_logits), axis=1), 10,dtype=tf.float32)
+    te_acc = tf.reduce_mean(tf.reduce_sum(tf.one_hot(b_teY,10,dtype=tf.float32) * te_preds,axis=1),axis=0)
     return tr_loss,[tr_loss,tr_acc,te_loss,te_acc]
 
 
