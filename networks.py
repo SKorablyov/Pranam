@@ -65,9 +65,9 @@ def mnist_fcnet(b_size=1):
 
     # initialize variables
     with tf.variable_scope("mnist_fcnet"):
-        w1 = tf.get_variable("w1", shape=[784, 128], initializer=tf.truncated_normal_initializer)
-        w2 = tf.get_variable("w2", shape=[128, 64], initializer=tf.truncated_normal_initializer)
-        w3 = tf.get_variable("w3", shape=[64, 10], initializer=tf.truncated_normal_initializer)
+        w1 = tf.get_variable("w1", shape=[784, 128], initializer=tf.contrib.layers.xavier_initializer())
+        w2 = tf.get_variable("w2", shape=[128, 64], initializer=tf.contrib.layers.xavier_initializer())
+        w3 = tf.get_variable("w3", shape=[64, 10], initializer=tf.contrib.layers.xavier_initializer())
 
     # build network
     tr_input = tf.reshape(b_trX, [b_size, -1])

@@ -29,6 +29,7 @@ class cfg2:
     def __init__(self):
         self.name = "cfg2"
         self.out_path = "./results"
+        self.sess = tf.Session()
         self.b_size = 100
         self.num_epochs = 50
 

@@ -54,10 +54,11 @@ def mnist_fcnet_pranam(cfg):
 if __name__ == "__main__":
     # set up the config and folders
     config_name = "cfg3"
-    example = "mnist_fcnet_pranam"
+    example_name = "mnist_fcnet_pranam"
     if len(sys.argv) >= 2:
         config_name = sys.argv[1]
+    if len(sys.argv) >= 3:
+        example_name = sys.argv[2]
     cfg = eval(config_name)()
     if not os.path.exists(cfg.out_path): os.makedirs(cfg.out_path)
-
-    eval(example)(cfg)
+    eval(example_name)(cfg)
