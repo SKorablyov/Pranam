@@ -41,6 +41,7 @@ def mnist_fcnet_pranam(cfg):
     tf.train.start_queue_runners(sess=cfg.sess, coord=coord)
     # run in the loop
     tm = utils.TrainingMonitor(cfg.name, cfg.out_path, n_ave=5000) # batch size is actually 1
+
     for i in range(cfg.num_epochs * 60000):
         _, _tr_loss, _tr_acc, _te_loss, _te_acc = cfg.sess.run([train_op, tr_loss, tr_acc, te_loss, te_acc])
         keys = ["tr_loss", "tr_acc", "te_loss", "te_acc"]
@@ -53,7 +54,7 @@ def mnist_fcnet_pranam(cfg):
 
 if __name__ == "__main__":
     # set up the config and folders
-    config_name = "cfg3"
+    config_name = "cfg20"
     example_name = "mnist_fcnet_pranam"
     if len(sys.argv) >= 2:
         config_name = sys.argv[1]

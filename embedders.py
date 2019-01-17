@@ -5,8 +5,8 @@ import numpy as np
 class ScaledTanh:
     def __init__(self,name,sess,init_a,train_a,init_b,train_b):
         self.sess = sess
-        self.var_a = tf.get_variable(name + "_var_a", dtype=tf.float32, initializer=init_a,trainable=train_a)
-        self.var_b = tf.get_variable(name + "_var_b", dtype=tf.float32, initializer=init_b,trainable=train_b)
+        self.var_a = tf.get_variable(name + "_var_a", dtype=tf.float32, initializer=init_a, trainable=train_a)
+        self.var_b = tf.get_variable(name + "_var_b", dtype=tf.float32, initializer=init_b, trainable=train_b)
 
     def doit(self,inputs):
         self.sess.run(tf.global_variables_initializer())  # FIXME initialize uninitalized vars only
@@ -66,7 +66,7 @@ class FCEmbedder:
                 sl = [slices[var_num][0], slices[var_num][1]]
                 embedded_var = tf.slice(top_layer[clone_num,:],[sl[0]],[sl[1]])
                 embedded_var = tf.reshape(embedded_var, varshapes[var_num])
-                self.embedded_variables[clone_num].append(embedded_var)
+                self.embedded_variables[clone_num].append(tf.stop_gradient(embedded_var))
 
     def compute_gradients(self):
         "compute and return state of embedding, and gradients on embedding"

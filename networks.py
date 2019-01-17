@@ -43,7 +43,7 @@ def nonconvex_net(dim=10,function="_schwefel"):
     return cost,[cost,guess]
 
 
-def mnist_fcnet(b_size=1):
+def mnist_fcnet(b_size,initializers,trainables):
     """ Network from tensorflow's first tutorial on MNIST
     :param b_size: integer, internal batch size
     :return:
@@ -65,9 +65,9 @@ def mnist_fcnet(b_size=1):
 
     # initialize variables
     with tf.variable_scope("mnist_fcnet"):
-        w1 = tf.get_variable("w1", shape=[784, 128], initializer=tf.contrib.layers.xavier_initializer())
-        w2 = tf.get_variable("w2", shape=[128, 64], initializer=tf.contrib.layers.xavier_initializer())
-        w3 = tf.get_variable("w3", shape=[64, 10], initializer=tf.contrib.layers.xavier_initializer())
+        w1 = tf.get_variable("w1", shape=[784, 128], initializer=initializers[0],trainable=trainables[0])
+        w2 = tf.get_variable("w2", shape=[128, 64], initializer=initializers[1],trainable=trainables[1])
+        w3 = tf.get_variable("w3", shape=[64, 10], initializer=initializers[2],trainable=trainables[2])
 
     # build network
     tr_input = tf.reshape(b_trX, [b_size, -1])

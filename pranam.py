@@ -110,22 +110,11 @@ class PranamOptimizer:
         coupled_grads = [[] for i in range(num_clones)]
 
         for grad, var in optim.compute_gradients(loss=cost_mean):
-
-            # fixme 1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! I don't understand how scaled tanh gets gradient at all??
-            #print var.name.split("/")
-            #print var.name.split("/")[0]
-            #print var.name.split("/")[0][6:]
-            #time.sleep(100)
-
-
-            clone_num = int(var.name.split("/")[0][6:])
-
-
             var_name = str("/".join(var.name.split("/")[1:])) # remove clone num
-
             if (grad is not None):
                 if ((embed_vars is None) or (var_name in embed_vars)):
                     # couple variable
+                    clone_num = int(var.name.split("/")[0][6:])
                     coupled_grads[clone_num].append(grad)
                     coupled_vars[clone_num].append(var)
                 else:
