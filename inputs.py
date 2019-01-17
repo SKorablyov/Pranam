@@ -5,6 +5,25 @@ import time, os, sys, socket
 from keras.datasets import mnist  # subroutines for fetching the MNIST dataset
 from keras.utils import np_utils  # utilities for one-hot encoding of ground truth values
 
+
+
+def load_mnist(b_size):
+    # load mnist
+    mnist = tf.keras.datasets.mnist
+    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    x_train, x_test = np.asarray(x_train / 255.0), x_test / 255.0
+    # build input queues
+    tr_q = tf.train.slice_input_producer([tf.convert_to_tensor(x_train, dtype=tf.float32),
+                                          tf.convert_to_tensor(y_train, tf.int32)])
+    b_trX, b_trY = tf.train.shuffle_batch(tr_q, num_threads=1, batch_size=b_size, capacity=64 * b_size,
+                                          min_after_dequeue=32 * b_size, allow_smaller_final_batch=False)
+    te_q = tf.train.slice_input_producer([tf.convert_to_tensor(x_test, tf.float32),
+                                          tf.convert_to_tensor(y_test, tf.int32)])
+    b_teX, b_teY = tf.train.shuffle_batch(te_q, num_threads=1, batch_size=b_size, capacity=64 * b_size,
+                                          min_after_dequeue=32 * b_size, allow_smaller_final_batch=False)
+    return b_trX, b_trY, b_teX, b_teY
+
+
 def hierarchical_compositional(genf_shape, n_samples, W=None, noise=None):
     "generate a bunch of samples, the activation function is frozen as relu"
     X = np.matrix(np.asarray(np.random.uniform(size=[n_samples, genf_shape[0]])))

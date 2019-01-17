@@ -1,5 +1,8 @@
 import tensorflow as tf
+import numpy as np
 import time
+import inputs
+
 
 def dummy_net(just_anything):
     """ Dummy net to test if GD works.
@@ -43,25 +46,16 @@ def nonconvex_net(dim=10,function="_schwefel"):
     return cost,[cost,guess]
 
 
+
 def mnist_fcnet(b_size,initializers,trainables):
     """ Network from tensorflow's first tutorial on MNIST
     :param b_size: integer, internal batch size
     :return:
     """
-    # load mnist
-    mnist = tf.keras.datasets.mnist
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    x_train, x_test = x_train / 255.0, x_test / 255.0
-
-    # build input queues
-    tr_q = tf.train.slice_input_producer([tf.convert_to_tensor(x_train, tf.float32),
-                                          tf.convert_to_tensor(y_train, tf.int32)])
-    b_trX, b_trY = tf.train.shuffle_batch(tr_q, num_threads=1, batch_size=b_size, capacity=64 * b_size,
-                                          min_after_dequeue=32 * b_size, allow_smaller_final_batch=False)
-    te_q = tf.train.slice_input_producer([tf.convert_to_tensor(x_test, tf.float32),
-                                          tf.convert_to_tensor(y_test, tf.int32)])
-    b_teX, b_teY = tf.train.shuffle_batch(te_q, num_threads=1, batch_size=b_size, capacity=64 * b_size,
-                                          min_after_dequeue=32 * b_size, allow_smaller_final_batch=False)
+    # load dataset and only create one loader for all copies
+    if not "mnist_fcnet_loader" in globals().keys():
+        globals()["mnist_fcnet_loader"] = inputs.load_mnist(b_size)
+    b_trX, b_trY, b_teX, b_teY = globals()["mnist_fcnet_loader"]
 
     # initialize variables
     with tf.variable_scope("mnist_fcnet"):
