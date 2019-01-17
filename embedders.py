@@ -28,20 +28,28 @@ class FCEmbedder:
         embed_shape[0] = len(variables)
         varshapes = [np.asarray(v.get_shape().as_list()) for v in variables[0]]
         embed_shape[-1] = int(np.sum([np.prod(shape) for shape in varshapes]))
+        embed_d = len(embed_shape)
         print "initialized FC embedding with of shape",embed_shape
 
         # build embedding
         input = tf.range(0, embed_shape[0])
         embed_params = tf.get_variable("FCEmbed_0", shape=[embed_shape[0], embed_shape[1]],
                                        initializer=initializers[0])
+        tf.summary.histogram("FCEmbed_0",embed_params)
         top_layer = tf.nn.embedding_lookup(params=embed_params, ids=input)
-        for i in range(1, len(embed_shape) - 1):
+        for i in range(1, embed_d - 1):
             w = tf.get_variable("FCEmbed_" + str(i), shape=[embed_shape[i], embed_shape[i + 1]],
                                 initializer=initializers[i])
             top_layer = tf.matmul(top_layer, w)
             if i < (len(embed_shape) - 2):
+                tf.summary.histogram("FCEmbed_" + str(i), w)
+                tf.summary.histogram("FCEmbed_out_" + str(i-1),top_layer)
                 top_layer = acts[i-1](top_layer)
-        top_layer = acts[len(embed_shape) - 2](top_layer)
+                tf.summary.histogram("FCEmbed_act_" + str(i-1), top_layer)
+
+        tf.summary.histogram("FCEmbed_out_" + str(embed_d -2), top_layer)
+        top_layer = acts[embed_d - 2](top_layer)
+        tf.summary.histogram("FCEmbed_act_" + str(embed_d - 2), top_layer)
 
         # compute the gradient on embedding
         input_gradients = []

@@ -56,13 +56,11 @@ def mnist_fcnet(b_size,initializers,trainables):
     if not "mnist_fcnet_loader" in globals().keys():
         globals()["mnist_fcnet_loader"] = inputs.load_mnist(b_size)
     b_trX, b_trY, b_teX, b_teY = globals()["mnist_fcnet_loader"]
-
     # initialize variables
     with tf.variable_scope("mnist_fcnet"):
         w1 = tf.get_variable("w1", shape=[784, 128], initializer=initializers[0],trainable=trainables[0])
         w2 = tf.get_variable("w2", shape=[128, 64], initializer=initializers[1],trainable=trainables[1])
         w3 = tf.get_variable("w3", shape=[64, 10], initializer=initializers[2],trainable=trainables[2])
-
     # build network
     tr_input = tf.reshape(b_trX, [b_size, -1])
     tr_logits = tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tr_input, w1)), w2)), w3)
@@ -74,6 +72,10 @@ def mnist_fcnet(b_size,initializers,trainables):
     te_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=te_logits, labels=b_teY)
     te_preds = tf.one_hot(tf.argmax(tf.nn.softmax(te_logits), axis=1), 10,dtype=tf.float32)
     te_acc = tf.reduce_mean(tf.reduce_sum(tf.one_hot(b_teY,10,dtype=tf.float32) * te_preds,axis=1),axis=0)
+    # summaries
+    tf.summary.histogram("w1",w1)
+    tf.summary.histogram("w2",w2)
+    tf.summary.histogram("w3",w3)
     return tr_loss,[tr_loss,tr_acc,te_loss,te_acc]
 
 

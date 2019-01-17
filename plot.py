@@ -1,22 +1,28 @@
 import os,sys,time
 import numpy as np
+import pandas as pd
 import matplotlib
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
-# plot to compare optimizers
-# 30 tf.train.GradientDescentOptimizer (with scheduler)
-# 32 tf.train.AdamOptimizer
-# 34 tf.train.RMSPropOptimizer
-# 36 tf.train.AdadeltaOptimizer
-# 38 tf.train.GradientDescentOptimizer
 
 
-db_root = "/home/viacheslav/Documents/9520_final/SubData"
-out_path = "/home/viacheslav/Documents/9520_final/Plots"
+db_root = "./results"
+runfiles = [f for f in os.listdir(db_root) if os.path.isfile(os.path.join(db_root, f))]
+
+for runfile in runfiles:
+    dframe = pd.read_csv(os.path.join(db_root,runfile),header=1)
+    print dframe
+
+
+print runfiles
+time.sleep(100)
+
+
+#out_path = "/home/viacheslav/Documents/9520_final/Plots"
 #folders = ["cfg4_30","cfg4_31","cfg4_32","cfg4_33","cfg4_34","cfg4_35","cfg4_36","cfg4_37","cfg4_38","cfg4_39"]
 #folders= ["cfg4_a11","cfg4_a2","cfg4_a12","cfg4_b1","cfg4_b2","cfg4_b12","cfg4_c1","cfg4_c2","cfg_em12"]
 #folders= ["cfg4_c1","cfg4_c2","cfg_em12"]
-folders=["1","2","3","4"]
+#folders=["1","2","3","4"]
 
 #from os import listdir
 #from os.path import isfile, join
@@ -32,7 +38,6 @@ for folder_name in folders:
         run_data = np.loadtxt(os.path.join(folder,runfile))
         runs_data.append(run_data)
     # work on data
-
     runs_data = np.asarray(runs_data)
     runs_mean = np.mean(runs_data,axis=0)
 
