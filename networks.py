@@ -47,7 +47,7 @@ def nonconvex_net(dim=10,function="_schwefel"):
 
 
 
-def mnist_fcnet(b_size,initializers,trainables):
+def mnist_fcnet(b_size,initializers,trainables,shapes):
     """ Network from tensorflow's first tutorial on MNIST
     :param b_size: integer, internal batch size
     :return:
@@ -58,18 +58,18 @@ def mnist_fcnet(b_size,initializers,trainables):
     b_trX, b_trY, b_teX, b_teY = globals()["mnist_fcnet_loader"]
     # initialize variables
     with tf.variable_scope("mnist_fcnet"):
-        w1 = tf.get_variable("w1", shape=[784, 128], initializer=initializers[0],trainable=trainables[0])
-        w2 = tf.get_variable("w2", shape=[128, 64], initializer=initializers[1],trainable=trainables[1])
-        w3 = tf.get_variable("w3", shape=[64, 10], initializer=initializers[2],trainable=trainables[2])
+        w1 = tf.get_variable("w1", shape=[784, shapes[0]], initializer=initializers[0], trainable=trainables[0])
+        w2 = tf.get_variable("w2", shape=[shapes[0], shapes[1]], initializer=initializers[1], trainable=trainables[1])
+        w3 = tf.get_variable("w3", shape=[shapes[1], 10], initializer=initializers[2], trainable=trainables[2])
     # build network
     tr_input = tf.reshape(b_trX, [b_size, -1])
     tr_logits = tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tr_input, w1)), w2)), w3)
-    tr_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=tr_logits, labels=b_trY)
+    tr_loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=tr_logits, labels=b_trY),axis=0)
     tr_preds = tf.one_hot(tf.argmax(tf.nn.softmax(tr_logits), axis=1), 10,dtype=tf.float32)
     tr_acc = tf.reduce_mean(tf.reduce_sum(tf.one_hot(b_trY,10,dtype=tf.float32) * tr_preds,axis=1),axis=0)
     te_input = tf.reshape(b_teX, [b_size, -1])
     te_logits = tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(te_input, w1)), w2)), w3)
-    te_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=te_logits, labels=b_teY)
+    te_loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=te_logits, labels=b_teY),axis=0)
     te_preds = tf.one_hot(tf.argmax(tf.nn.softmax(te_logits), axis=1), 10,dtype=tf.float32)
     te_acc = tf.reduce_mean(tf.reduce_sum(tf.one_hot(b_teY,10,dtype=tf.float32) * te_preds,axis=1),axis=0)
     # summaries

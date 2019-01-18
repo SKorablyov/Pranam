@@ -3,6 +3,8 @@
 # Thoughts
 Monitor saturations (as in the figure 6 - I should print activations)
 batch size dependence
+I am not exactly happy with two nonlinearities -- one of the weight itself, one on the product
+
 Add best network instead on average (average was only reasonably good for Schwefel)
 Try softsign instead of tanh (and other nonlinerities)
 Start with mean gradient --> progress everything is for the best gradient

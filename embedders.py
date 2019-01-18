@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import time
 
 
 class ScaledTanh:
@@ -16,7 +17,7 @@ class ScaledTanh:
         return act_inputs
 
 class FCEmbedder:
-    def __init__(self,sess,variables,gradients,embed_shape,initializers,acts):
+    def __init__(self,sess,variables,gradients,embed_shape,initializers,acts,warmup):
         """
         :param variables: 2D array of variables to embed
         :param gradients: 2D array of gradients for the varibles to embed
@@ -39,7 +40,7 @@ class FCEmbedder:
         top_layer = tf.nn.embedding_lookup(params=embed_params, ids=input)
         for i in range(1, embed_d - 1):
             w = tf.get_variable("FCEmbed_" + str(i), shape=[embed_shape[i], embed_shape[i + 1]],
-                                initializer=initializers[i])
+                               initializer=initializers[i])
             top_layer = tf.matmul(top_layer, w)
             if i < (len(embed_shape) - 2):
                 tf.summary.histogram("FCEmbed_" + str(i), w)
@@ -51,13 +52,43 @@ class FCEmbedder:
         top_layer = acts[embed_d - 2](top_layer)
         tf.summary.histogram("FCEmbed_act_" + str(embed_d - 2), top_layer)
 
+        # soft initialization, or warmup: train embedding to have desired weights
+        optim = tf.train.GradientDescentOptimizer(0.01)  # todo this is a trick to get gradients; rewrite cleaner
+        input_variables = []
+        for vars in variables:
+            input_variables.append(tf.concat([tf.reshape(v, [-1]) for v in vars], axis=0))
+        input_variables = tf.stack(input_variables, axis=0)
+
+        if warmup == "fit":
+            init_loss = tf.reduce_sum((top_layer - tf.stop_gradient(input_variables)) ** 2)
+            init_step = optim.minimize(init_loss)
+            sess = tf.Session()
+            sess.run(tf.global_variables_initializer())  # fixme! initialize uninitialized!!!!!!
+            #_input_variables = sess.run(input_variables)
+            #print "warmup:", np.var(_input_variables), np.min(_input_variables), np.max(np.abs(_input_variables))
+            for i in range(400):
+                print sess.run([init_loss, init_step])
+        elif warmup == "rescale":
+            sess.run(tf.global_variables_initializer())  # fixme! initialize uninitialized!!!!!!
+            _input_variables,_top_layer = sess.run([input_variables,top_layer])
+            scaling_const = tf.constant((np.var(_input_variables) / np.var(_top_layer))**0.5,dtype=tf.float32)
+            top_layer = scaling_const * top_layer
+        elif warmup == "rescale_w":
+            w_adapt = tf.get_variable("FCEmbed_adapter", shape=[embed_shape[-1], embed_shape[-1]],
+                               initializer=tf.contrib.layers.xavier_initializer())
+            top_layer = tf.matmul(top_layer,w_adapt)
+            sess.run(tf.global_variables_initializer())  # fixme! initialize uninitialized!!!!!!
+            _input_variables,_top_layer = sess.run([input_variables,top_layer])
+            scaling_const = tf.constant((np.var(_input_variables) / np.var(_top_layer))**0.5,dtype=tf.float32)
+            top_layer = scaling_const * top_layer
+
+
         # compute the gradient on embedding
         input_gradients = []
         for grads in gradients:
             input_gradients.append(tf.concat([tf.reshape(g,[-1]) for g in grads],axis=0))
         input_gradients = tf.stack(input_gradients,axis=0)
         embedding_loss = (top_layer - tf.stop_gradient(top_layer) + tf.stop_gradient(input_gradients))**2
-        optim = tf.train.GradientDescentOptimizer(0.01) # todo this is a trick to get gradients; rewrite cleaner
         self.embedding_grads = []
         self.embedding_vars = []
         for grad,var in optim.compute_gradients(embedding_loss):
