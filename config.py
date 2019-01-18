@@ -715,7 +715,7 @@ class cfg28:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 1 # internal batch size in the function
+        b_size = 256 # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
         net_shapes = [20,20]
@@ -745,7 +745,7 @@ class cfg29:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 1 # internal batch size in the function
+        b_size = 256 # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
         net_shapes = [20,20]
@@ -775,7 +775,7 @@ class cfg30:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 1 # internal batch size in the function
+        b_size = 256 # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
         net_shapes = [20,20]
@@ -807,7 +807,7 @@ class cfg31:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 1  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
@@ -839,7 +839,7 @@ class cfg32:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 1  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
@@ -871,7 +871,7 @@ class cfg33:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 1  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
@@ -904,7 +904,7 @@ class cfg34:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 100  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
@@ -936,7 +936,7 @@ class cfg35:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 100  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
@@ -1000,7 +1000,7 @@ class cfg37:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 100  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
@@ -1032,7 +1032,7 @@ class cfg38:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 100  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
@@ -1096,7 +1096,7 @@ class cfg40:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 100  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
@@ -1128,7 +1128,7 @@ class cfg41:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 100  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
@@ -1192,7 +1192,7 @@ class cfg43:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 100  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
@@ -1224,7 +1224,7 @@ class cfg44:
         self.sess = tf.Session()
         # network and opt pars
         self.func = networks.mnist_fcnet
-        b_size = 100  # internal batch size in the function
+        b_size = 256  # internal batch size in the function
         inits = [tf.contrib.layers.xavier_initializer(), tf.contrib.layers.xavier_initializer(),
                  tf.contrib.layers.xavier_initializer()]
         trainables = [True, True, True]
