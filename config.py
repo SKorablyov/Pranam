@@ -52,10 +52,19 @@ class cfg_s2:
 class cfg2:
     def __init__(self):
         self.name = "cfg2"
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 0.001
         self.out_path = "./results"
         self.sess = tf.Session()
-        self.b_size = 100
+        self.batch_size = 256  # internal batch size in the function
         self.num_epochs = 50
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.softsign, tf.nn.softsign]
+        self.func_pars = [self.batch_size, inits, trainables, net_shapes, acts]
 
 
 class cfg3:
@@ -2383,3 +2392,36 @@ class cfg78:
                            tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
         embedding_acts = [tf.nn.relu, tf.nn.tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+
+# class cfg79:
+#     # should be 0.12 and go
+#     "FC network on mnist"
+#     def __init__(self):
+#         self.name = "cfg79"
+#         self.out_path = "./results"
+#         self.sess = tf.Session()
+#         # network and opt pars
+#         self.func = networks.mnist_fcnet
+#         b_size = 256  # internal batch size in the function
+#         inits = [tf.contrib.layers.xavier_initializer(),
+#                  tf.contrib.layers.xavier_initializer(),
+#                  tf.contrib.layers.xavier_initializer()]
+#         trainables = [True, True, True]
+#         net_shapes = [20, 20]
+#         acts = [tf.nn.relu, tf.nn.relu]
+#         self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+#         self.num_clones = 128
+#         self.optimizer = tf.train.GradientDescentOptimizer
+#         self.learning_rate = 1e-5
+#         self.batch_size = 1
+#         self.num_epochs = 100
+#         # embedding pars
+#         self.embed_vars = ["mnist_fcnet/w2:0"]
+#         self.embedder = embedders.FCEmbedder
+#         embedding_shape = [None, 256, None]
+#         embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+#                            tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+#         embedding_acts = [tf.nn.relu, tf.nn.tanh]
+#         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
