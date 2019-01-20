@@ -110,10 +110,10 @@ def mnist_fcnet_pranam(cfg):
 
 if __name__ == "__main__":
     # set up the config and folders
-    #config_name = "cfg64"
-    #example_name = "mnist_fcnet_pranam"
-    config_name = "cfg_s2"
-    example_name = "schwefel_net_pranam"
+    config_name = "cfg64"
+    example_name = "mnist_fcnet_pranam"
+    #config_name = "cfg_s2"
+    #example_name = "schwefel_net_pranam"
 
     if len(sys.argv) >= 2:
         config_name = sys.argv[1]
