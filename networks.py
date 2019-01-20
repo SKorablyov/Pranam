@@ -20,7 +20,7 @@ def dummy_net(just_anything):
     return cost, [tf.reduce_sum(cost)]
 
 
-def nonconvex_net(dim=10,function="_schwefel"):
+def schwefel_net(dim=10, function="_schwefel"):
     """ Example to test nonconvex optimization. The network itself is one layer of size dim. The loss function is
     also of dimention dim, and might be typically non-convex.
 
@@ -41,13 +41,13 @@ def nonconvex_net(dim=10,function="_schwefel"):
         result = 418.9829 * tf.to_float(tf.shape(x)[0]) - tf.reduce_sum(tf.sin(tf.abs(x) ** 0.5) * x)
         return result
 
-    guess = tf.get_variable(name="schnet_guess",shape=[dim],initializer=tf.random_uniform_initializer())
+    guess = tf.get_variable(name="schnet_guess", shape=[dim], initializer=tf.random_uniform_initializer())
     cost = eval(function)(guess)
-    return cost,[cost,guess]
+    return cost, [cost, guess]
 
 
 
-def mnist_fcnet(b_size,initializers,trainables,shapes):
+def mnist_fcnet(b_size,initializers,trainables,shapes,acts):
     """ Network from tensorflow's first tutorial on MNIST
     :param b_size: integer, internal batch size
     :return:
@@ -63,12 +63,12 @@ def mnist_fcnet(b_size,initializers,trainables,shapes):
         w3 = tf.get_variable("w3", shape=[shapes[1], 10], initializer=initializers[2], trainable=trainables[2])
     # build network
     tr_input = tf.reshape(b_trX, [b_size, -1])
-    tr_logits = tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tr_input, w1)), w2)), w3)
+    tr_logits = tf.matmul(acts[1](tf.matmul(acts[0](tf.matmul(tr_input, w1)), w2)), w3)
     tr_loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=tr_logits, labels=b_trY),axis=0)
     tr_preds = tf.one_hot(tf.argmax(tf.nn.softmax(tr_logits), axis=1), 10,dtype=tf.float32)
     tr_acc = tf.reduce_mean(tf.reduce_sum(tf.one_hot(b_trY,10,dtype=tf.float32) * tr_preds,axis=1),axis=0)
     te_input = tf.reshape(b_teX, [b_size, -1])
-    te_logits = tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(te_input, w1)), w2)), w3)
+    te_logits = tf.matmul(acts[1](tf.matmul(acts[0](tf.matmul(te_input, w1)), w2)), w3)
     te_loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=te_logits, labels=b_teY),axis=0)
     te_preds = tf.one_hot(tf.argmax(tf.nn.softmax(te_logits), axis=1), 10,dtype=tf.float32)
     te_acc = tf.reduce_mean(tf.reduce_sum(tf.one_hot(b_teY,10,dtype=tf.float32) * te_preds,axis=1),axis=0)

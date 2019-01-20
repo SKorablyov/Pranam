@@ -1,9 +1,48 @@
 import tensorflow as tf
+import numpy as np
 import sys,os
 import utils,networks#,config
 from config import *
 import time
 from pranam import PranamOptimizer
+
+
+def schwefel_net_adam(cfg):
+    cost, metrics = cfg.func(*cfg.func_pars)
+    sess = tf.Session()
+    #coord = tf.train.Coordinator()
+    train_step = tf.train.GradientDescentOptimizer(learning_rate=cfg.learning_rate).minimize(cost)
+    sess.run(tf.global_variables_initializer())
+    #tf.train.start_queue_runners(sess, coord)
+    for i in range(cfg.num_steps):
+        _, _metrics = sess.run([train_step, metrics])
+        _cost, _coords = _metrics
+
+        print _cost
+        print "step:",i,"mean_cost:",np.mean(_cost),"min_cost", np.min(_cost)#,# "min_coords", _coords[np.argmin(_cost)]
+
+def schwefel_net_pranam(cfg):
+
+    # initialize parameters to run
+    #cfg.learning_rate = tf.placeholder(tf.float32)
+    opt = PranamOptimizer(sess=cfg.sess, func=cfg.func, func_pars=cfg.func_pars, num_clones=cfg.num_clones,
+                          optimizer=cfg.optimizer, learning_rate=cfg.learning_rate, batch_size=cfg.batch_size,
+                          embed_vars=cfg.embed_vars, embedder=cfg.embedder, embedder_pars=cfg.embedder_pars)
+    train_op, metrics = opt.train_step()
+
+    #cost, metrics = cfg.func(*cfg.func_pars)
+    sess = tf.Session()
+    #coord = tf.train.Coordinator()
+    #train_step = tf.train.GradientDescentOptimizer(learning_rate=cfg.learning_rate).minimize(cost)
+    sess.run(tf.global_variables_initializer())
+    #tf.train.start_queue_runners(sess, coord)
+    for i in range(cfg.num_steps):
+        _, _metrics = sess.run([train_op, metrics])
+        _cost, _coords = _metrics
+        print "step:",i,"mean_cost:",np.mean(_cost),"min_cost", np.min(_cost)#,# "min_coords", _coords[np.argmin(_cost)]
+
+
+
 
 
 
@@ -71,8 +110,11 @@ def mnist_fcnet_pranam(cfg):
 
 if __name__ == "__main__":
     # set up the config and folders
-    config_name = "cfg34"
-    example_name = "mnist_fcnet_pranam"
+    #config_name = "cfg64"
+    #example_name = "mnist_fcnet_pranam"
+    config_name = "cfg_s2"
+    example_name = "schwefel_net_pranam"
+
     if len(sys.argv) >= 2:
         config_name = sys.argv[1]
     if len(sys.argv) >= 3:

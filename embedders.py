@@ -59,7 +59,9 @@ class FCEmbedder:
             input_variables.append(tf.concat([tf.reshape(v, [-1]) for v in vars], axis=0))
         input_variables = tf.stack(input_variables, axis=0)
 
-        if warmup == "fit":
+        if warmup == None:
+            pass
+        elif warmup == "fit":
             init_loss = tf.reduce_sum((top_layer - tf.stop_gradient(input_variables)) ** 2)
             init_step = optim.minimize(init_loss)
             sess = tf.Session()
@@ -81,14 +83,15 @@ class FCEmbedder:
             _input_variables,_top_layer = sess.run([input_variables,top_layer])
             scaling_const = tf.constant((np.var(_input_variables) / np.var(_top_layer))**0.5,dtype=tf.float32)
             top_layer = scaling_const * top_layer
-
+        else:
+            raise ValueError("can't start weights, initial warmup not known:", warmup)
 
         # compute the gradient on embedding
         input_gradients = []
         for grads in gradients:
             input_gradients.append(tf.concat([tf.reshape(g,[-1]) for g in grads],axis=0))
         input_gradients = tf.stack(input_gradients,axis=0)
-        embedding_loss = (top_layer - tf.stop_gradient(top_layer) + tf.stop_gradient(input_gradients))**2
+        embedding_loss = tf.reduce_sum((top_layer - tf.stop_gradient(top_layer) + tf.stop_gradient(input_gradients))**2)
         self.embedding_grads = []
         self.embedding_vars = []
         for grad,var in optim.compute_gradients(embedding_loss):
