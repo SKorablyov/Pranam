@@ -61,6 +61,9 @@ def mnist_fcnet(b_size,initializers,trainables,shapes,acts):
         w1 = tf.get_variable("w1", shape=[784, shapes[0]], initializer=initializers[0], trainable=trainables[0])
         w2 = tf.get_variable("w2", shape=[shapes[0], shapes[1]], initializer=initializers[1], trainable=trainables[1])
         w3 = tf.get_variable("w3", shape=[shapes[1], 10], initializer=initializers[2], trainable=trainables[2])
+
+        w3 = w3 + (1e-7 * tf.reduce_min(tf.get_variable("fake_w3", shape=[2,2], initializer=initializers[2])))
+
     # build network
     tr_input = tf.reshape(b_trX, [b_size, -1])
     tr_logits = tf.matmul(acts[1](tf.matmul(acts[0](tf.matmul(tr_input, w1)), w2)), w3)

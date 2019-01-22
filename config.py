@@ -1,6 +1,31 @@
 import tensorflow as tf
 import networks,embedders,utils
 
+
+class cfg_t1:
+    # tests simple gradient descent
+    def __init__(self):
+        self.name = "cfg_t1"
+        self.optimizer_params = [tf.train.GradientDescentOptimizer, 0.01]
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        self.num_steps = 1000
+        self.num_clones = 1
+        self.batch_size = 1
+
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/fake_w3:0"]
+        embedder = embedders.FCEmbedder
+        embedding_shape = [None, None]
+        def constant_init(a,partition_info,dtype):
+            return tf.constant([[5, 4, 3, 2, 1]], dtype=dtype)
+        embedding_inits = [constant_init]
+        def no_act(x):
+            return x
+        embedding_acts = [no_act]
+        self.embedder_params = [embedder, embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
 class cfg_s1:
     def __init__(self):
         "network for schwefel -- needs fixes since runs out of range"
@@ -23,6 +48,7 @@ class cfg_s1:
         scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=1.0, train_b=False).doit
         embedding_acts = [tf.nn.relu,scaled_tanh]
         self.embedder_pars = [embedding_shape,embedding_inits,embedding_acts, None]
+
 
 class cfg_s2:
     def __init__(self):
@@ -49,7 +75,55 @@ class cfg_s2:
         self.embedder_pars = [embedding_shape,embedding_inits,embedding_acts, None]
 
 
-class cfg2:
+class cfg_s3:
+    def __init__(self):
+        "network for schwefel -- needs fixes since runs out of range"
+        self.name = "cfg1"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.schwefel_net
+        self.func_pars = [10]
+        self.num_clones = 100
+        self.optimizer_params = [tf.train.GradientDescentOptimizer, 1e-3]#4e-6
+        self.batch_size = 1
+        self.num_steps = 20000
+        # embedding pars
+        self.embed_vars = None
+        embedder = embedders.FCEmbedder
+        embedding_shape = [None, 250, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=10.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=10.0, distribution="uniform")
+                           ]
+        embedding_acts = [tf.nn.relu,tf.nn.softsign]
+        self.embedder_params = [embedder,embedding_shape,embedding_inits,embedding_acts, None]
+
+
+class cfg_s4:
+    def __init__(self):
+        "network for schwefel -- needs fixes since runs out of range"
+        self.name = "cfg1"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.schwefel_net
+        self.func_pars = [400]
+        self.num_clones = 100
+        self.optimizer_params = [tf.train.GradientDescentOptimizer, 1e-3]#4e-6
+        self.batch_size = 1
+        self.num_steps = 20000
+        # embedding pars
+        self.embed_vars = None
+        embedder = embedders.FCEmbedder
+        embedding_shape = [None, 250, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=10.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=10.0, distribution="uniform")
+                           ]
+        embedding_acts = [tf.nn.relu,tf.nn.softsign]
+        self.embedder_params = [embedder,embedding_shape,embedding_inits,embedding_acts, None]
+
+
+class cfg_a2:
     def __init__(self):
         self.name = "cfg2"
         self.optimizer = tf.train.GradientDescentOptimizer
@@ -66,6 +140,23 @@ class cfg2:
         acts = [tf.nn.softsign, tf.nn.softsign]
         self.func_pars = [self.batch_size, inits, trainables, net_shapes, acts]
 
+
+class cfg_a3:
+    def __init__(self):
+        self.name = "cfg2"
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 0.001
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        self.batch_size = 256  # internal batch size in the function
+        self.num_epochs = 50
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.relu, tf.nn.relu]
+        self.func_pars = [self.batch_size, inits, trainables, net_shapes, acts]
 
 class cfg3:
     def __init__(self):
@@ -291,8 +382,6 @@ class cfg11:
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts]
 
 
-
-
 class cfg12:
     def __init__(self):
         self.name = "cfg12"
@@ -348,6 +437,7 @@ class cfg13:
         embedding_acts = [tf.nn.relu, scaled_tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts]
 
+
 class cfg14:
     def __init__(self):
         self.name = "cfg14"
@@ -374,6 +464,7 @@ class cfg14:
         scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=0.01, train_b=False).doit # fixme trainabe
         embedding_acts = [tf.nn.relu, scaled_tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts]
+
 
 class cfg15:
     def __init__(self):
@@ -458,6 +549,7 @@ class cfg17:
         embedding_acts = [tf.nn.relu, scaled_tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts]
 
+
 class cfg18:
     def __init__(self):
         self.name = "cfg18"
@@ -484,6 +576,7 @@ class cfg18:
         scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=0.01, train_b=False).doit # fixme trainabe
         embedding_acts = [tf.nn.relu, scaled_tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts]
+
 
 class cfg19:
     def __init__(self):
@@ -735,9 +828,6 @@ class cfg27:
         # fixme trainabe
         embedding_acts = [tf.nn.relu, scaled_tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts]
-
-
-
 
 
 class cfg28:
@@ -1100,6 +1190,7 @@ class cfg38:
         embedding_acts = [tf.nn.tanh, scaled_tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
 
+
 class cfg39:
     def __init__(self):
         self.name = "cfg39"
@@ -1130,7 +1221,6 @@ class cfg39:
         scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=1.0, train_b=False).doit # fixme trainabe
         embedding_acts = [tf.nn.tanh, scaled_tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
-
 
 
 class cfg40:
@@ -1196,6 +1286,7 @@ class cfg41:
         embedding_acts = [tf.nn.tanh, tf.nn.tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
 
+
 class cfg42:
     def __init__(self):
         self.name = "cfg42"
@@ -1226,7 +1317,6 @@ class cfg42:
         # scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=1.0, train_b=False).doit # fixme trainabe
         embedding_acts = [tf.nn.tanh, tf.nn.tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
-
 
 
 class cfg43:
@@ -1414,7 +1504,6 @@ class cfg48:
         #scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=1.0, train_b=False).doit # fixme trainabe
         embedding_acts = [tf.nn.tanh, tf.nn.tanh]
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "fit"]
-
 
 
 class cfg49:
@@ -2394,34 +2483,522 @@ class cfg78:
         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
 
 
+class cfg79:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg79"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.relu,tf.nn.relu]
+        self.func_pars = [b_size, inits, trainables, net_shapes,acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer()]
+        scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=1.0, train_b=False).doit # fixme trainabe
+        embedding_acts = [tf.nn.tanh, scaled_tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
 
-# class cfg79:
-#     # should be 0.12 and go
-#     "FC network on mnist"
-#     def __init__(self):
-#         self.name = "cfg79"
-#         self.out_path = "./results"
-#         self.sess = tf.Session()
-#         # network and opt pars
-#         self.func = networks.mnist_fcnet
-#         b_size = 256  # internal batch size in the function
-#         inits = [tf.contrib.layers.xavier_initializer(),
-#                  tf.contrib.layers.xavier_initializer(),
-#                  tf.contrib.layers.xavier_initializer()]
-#         trainables = [True, True, True]
-#         net_shapes = [20, 20]
-#         acts = [tf.nn.relu, tf.nn.relu]
-#         self.func_pars = [b_size, inits, trainables, net_shapes, acts]
-#         self.num_clones = 128
-#         self.optimizer = tf.train.GradientDescentOptimizer
-#         self.learning_rate = 1e-5
-#         self.batch_size = 1
-#         self.num_epochs = 100
-#         # embedding pars
-#         self.embed_vars = ["mnist_fcnet/w2:0"]
-#         self.embedder = embedders.FCEmbedder
-#         embedding_shape = [None, 256, None]
-#         embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
-#                            tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
-#         embedding_acts = [tf.nn.relu, tf.nn.tanh]
-#         self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+class cfg80:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg80"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.relu,tf.nn.relu]
+        self.func_pars = [b_size, inits, trainables, net_shapes,acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer()]
+        scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=1.0, train_b=False).doit # fixme trainabe
+        embedding_acts = [tf.nn.softsign, scaled_tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg81:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg81"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.relu, tf.nn.relu]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer()]
+        #scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=1.0, train_b=False).doit # fixme trainabe
+        embedding_acts = [tf.nn.softsign, tf.nn.softsign]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg82:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg82"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.softsign, tf.nn.softsign]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer()]
+        scaled_tanh = embedders.ScaledTanh("sctanh1", self.sess, init_a=1.0, train_a=False, init_b=1.0, train_b=False).doit # fixme trainabe
+        embedding_acts = [tf.nn.softsign, scaled_tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg83:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg83"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.softsign, tf.nn.softsign]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer()]
+        embedding_acts = [tf.nn.softsign, tf.nn.softsign]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg84:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg84"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.softsign, tf.nn.softsign]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.contrib.layers.xavier_initializer(),
+                           tf.contrib.layers.xavier_initializer()]
+        embedding_acts = [tf.nn.softsign, tf.nn.softsign]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg85:
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg85"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.softsign, tf.nn.softsign]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+        embedding_acts = [tf.nn.relu, tf.nn.tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg86:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg86"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.softsign, tf.nn.softsign]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+        embedding_acts = [tf.nn.relu, tf.nn.tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg87:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg87"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.relu, tf.nn.relu]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+        embedding_acts = [tf.nn.relu, tf.nn.tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg88:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg88"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.softsign, tf.nn.softsign]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 128, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+        embedding_acts = [tf.nn.relu, tf.nn.tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg89:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg89"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.relu, tf.nn.relu]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 64
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 128, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+        embedding_acts = [tf.nn.relu, tf.nn.tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg90:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg90"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.softsign, tf.nn.softsign]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 32
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+        embedding_acts = [tf.nn.relu, tf.nn.tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg91:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg91"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.relu, tf.nn.relu]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 32
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 64, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+        embedding_acts = [tf.nn.relu, tf.nn.tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg92:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg92"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.softsign, tf.nn.softsign]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 128
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 256, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+        embedding_acts = [tf.nn.relu, tf.nn.tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg93:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg93"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.relu, tf.nn.relu]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 128
+        self.optimizer = tf.train.GradientDescentOptimizer
+        self.learning_rate = 1e-3
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/w2:0"]
+        self.embedder = embedders.FCEmbedder
+        embedding_shape = [None, 256, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+        embedding_acts = [tf.nn.relu, tf.nn.tanh]
+        self.embedder_pars = [embedding_shape, embedding_inits, embedding_acts, "rescale"]
+
+
+class cfg94:
+    # should be 0.12 and go
+    "FC network on mnist"
+    def __init__(self):
+        self.name = "cfg94"
+        self.out_path = "./results"
+        self.sess = tf.Session()
+        # network and opt pars
+        self.func = networks.mnist_fcnet
+        b_size = 256  # internal batch size in the function
+        inits = [tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer(),
+                 tf.contrib.layers.xavier_initializer()]
+        trainables = [True, True, True]
+        net_shapes = [20, 20]
+        acts = [tf.nn.relu, tf.nn.relu]
+        self.func_pars = [b_size, inits, trainables, net_shapes, acts]
+        self.num_clones = 1
+        self.optimizer_params = [tf.train.GradientDescentOptimizer, 1e-3]
+        self.batch_size = 1
+        self.num_epochs = 100
+        # embedding pars
+        self.embed_vars = ["mnist_fcnet/fake_w3:0"]
+        embedder = embedders.FCEmbedder
+        embedding_shape = [None, None]
+        embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
+                           tf.initializers.variance_scaling(scale=20.0, distribution="uniform")]
+        def no_act(x):
+            return x
+        embedding_acts = [no_act]
+        self.embedder_params = [embedder, embedding_shape, embedding_inits, embedding_acts, "rescale"]

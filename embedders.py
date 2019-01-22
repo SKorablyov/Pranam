@@ -91,16 +91,17 @@ class FCEmbedder:
         for grads in gradients:
             input_gradients.append(tf.concat([tf.reshape(g,[-1]) for g in grads],axis=0))
         input_gradients = tf.stack(input_gradients,axis=0)
-        embedding_loss = tf.reduce_sum((top_layer - tf.stop_gradient(top_layer) + tf.stop_gradient(input_gradients))**2)
+        embedding_loss = 0.5 * ((top_layer - tf.stop_gradient(top_layer) + tf.stop_gradient(input_gradients))**2)
+
         self.embedding_grads = []
         self.embedding_vars = []
-        for grad,var in optim.compute_gradients(embedding_loss):
+        for grad, var in optim.compute_gradients(embedding_loss):
             if grad is not None:
                 self.embedding_grads.append(grad)
                 self.embedding_vars.append(var)
 
         # compute the state of the embedding
-        slices = np.concatenate([[0],np.cumsum([int(np.prod(shape)) for shape in varshapes])],axis=0)
+        slices = np.concatenate([[0], np.cumsum([int(np.prod(shape)) for shape in varshapes])],axis=0)
         slices = [np.array([slices[i], slices[i+1] - slices[i]]) for i in range(slices.shape[0]-1)]
         self.embedded_variables = [[] for _ in range(embed_shape[0])]
         for clone_num in range(embed_shape[0]):

@@ -7,6 +7,38 @@ import time
 from pranam import PranamOptimizer
 
 
+def test_pranam(cfg):
+    # setup
+    def _some_function():
+        targets = tf.constant([1,2,3,4,5],dtype=tf.float32)
+        guess = tf.Variable([5,4,3,2,1],dtype=tf.float32)
+        cost = tf.reduce_mean((targets - guess)**2)
+        return cost,[cost]
+
+    # regular optimizer
+    cost, adam_metrics = _some_function()
+    adam_step = cfg.optimizer_params[0](*cfg.optimizer_params[1:]).minimize(cost)
+
+    # same optimizer with parametrization
+    pranam = PranamOptimizer(sess=cfg.sess, func=_some_function, func_pars=[], num_clones=cfg.num_clones,
+                             optimizer_params=cfg.optimizer_params, batch_size=cfg.batch_size, embed_vars=None,
+                             embedder_params=cfg.embedder_params)
+    pranam_step, pranam_metrics = pranam.train_step()
+
+    cfg.sess.run(tf.global_variables_initializer())
+    for i in range(cfg.num_steps):
+        _, _adam_cost = cfg.sess.run([adam_step, adam_metrics])
+        print "adam_step:", i, "adam_cost:", _adam_cost
+        _, _pranam_cost = cfg.sess.run([pranam_step, pranam_metrics])
+        print "pranam_step:", i, "pranam_cost:", _pranam_cost
+
+
+
+
+
+
+
+
 def schwefel_net_adam(cfg):
     cost, metrics = cfg.func(*cfg.func_pars)
     sess = tf.Session()
@@ -17,19 +49,17 @@ def schwefel_net_adam(cfg):
     for i in range(cfg.num_steps):
         _, _metrics = sess.run([train_step, metrics])
         _cost, _coords = _metrics
-
         print _cost
-        print "step:",i,"mean_cost:",np.mean(_cost),"min_cost", np.min(_cost)#,# "min_coords", _coords[np.argmin(_cost)]
+        print "step:", i, "mean_cost:",np.mean(_cost),"min_cost", np.min(_cost)
+
 
 def schwefel_net_pranam(cfg):
-
     # initialize parameters to run
     #cfg.learning_rate = tf.placeholder(tf.float32)
     opt = PranamOptimizer(sess=cfg.sess, func=cfg.func, func_pars=cfg.func_pars, num_clones=cfg.num_clones,
-                          optimizer=cfg.optimizer, learning_rate=cfg.learning_rate, batch_size=cfg.batch_size,
-                          embed_vars=cfg.embed_vars, embedder=cfg.embedder, embedder_pars=cfg.embedder_pars)
+                          optimizer_params=cfg.optimizer_params, batch_size=cfg.batch_size, embed_vars=cfg.embed_vars,
+                          embedder_params=cfg.embedder_params)
     train_op, metrics = opt.train_step()
-
     #cost, metrics = cfg.func(*cfg.func_pars)
     sess = tf.Session()
     #coord = tf.train.Coordinator()
@@ -42,14 +72,10 @@ def schwefel_net_pranam(cfg):
         print "step:",i,"mean_cost:",np.mean(_cost),"min_cost", np.min(_cost)#,# "min_coords", _coords[np.argmin(_cost)]
 
 
-
-
-
-
 def mnist_fcnet_adam(cfg):
     # initialize parameters to run
     tr_loss, metrics = networks.mnist_fcnet(*cfg.func_pars)
-    train_step = tf.train.AdamOptimizer().minimize(tr_loss)
+    train_step = cfg.optimizer(cfg.learning_rate).minimize(tr_loss)
     sess = tf.Session()
     coord = tf.train.Coordinator()
     sess.run(tf.global_variables_initializer())
@@ -67,8 +93,8 @@ def mnist_fcnet_adam(cfg):
 def mnist_fcnet_pranam(cfg):
     # initialize parameters to run
     opt = PranamOptimizer(sess=cfg.sess, func=cfg.func, func_pars=cfg.func_pars, num_clones=cfg.num_clones,
-                          optimizer=cfg.optimizer, learning_rate=cfg.learning_rate, batch_size=cfg.batch_size,
-                          embed_vars=cfg.embed_vars, embedder=cfg.embedder, embedder_pars=cfg.embedder_pars)
+                          optimizer_params=cfg.optimizer_params, batch_size=cfg.batch_size,
+                          embed_vars=cfg.embed_vars, embedder_params=cfg.embedder_params)
     train_op, metrics = opt.train_step()
     tr_loss_mean = tf.reduce_mean(metrics[0],axis=0)
     tr_acc_mean = tf.reduce_mean(metrics[1],axis=0)
@@ -77,12 +103,12 @@ def mnist_fcnet_pranam(cfg):
     te_loss_min = tf.gather(metrics[2],tf.argmin(metrics[0]))
     te_acc_min = tf.gather(metrics[3],tf.argmin(metrics[0]))
     # summaries
-    tf.summary.scalar("tr_loss_mean",tr_loss_mean)
-    tf.summary.scalar("tr_acc_mean",tr_acc_mean)
-    tf.summary.scalar("te_loss_mean",te_loss_mean)
-    tf.summary.scalar("te_acc_mean",te_acc_mean)
-    tf.summary.scalar("te_loss_min",te_loss_min)
-    tf.summary.scalar("te_acc_min",te_acc_min)
+    tf.summary.scalar("tr_loss_mean", tr_loss_mean)
+    tf.summary.scalar("tr_acc_mean", tr_acc_mean)
+    tf.summary.scalar("te_loss_mean", te_loss_mean)
+    tf.summary.scalar("te_acc_mean", te_acc_mean)
+    tf.summary.scalar("te_loss_min", te_loss_min)
+    tf.summary.scalar("te_acc_min", te_acc_min)
     # initializers
     max_VRAM = tf.contrib.memory_stats.MaxBytesInUse()
     tf.summary.scalar("max_VRAM", max_VRAM)
@@ -104,16 +130,20 @@ def mnist_fcnet_pranam(cfg):
 
         print i
 
-        if i % 5000 == 1990: # fixme temp
+        if i % 50 == 19: # fixme temp
             tm.check_save()
             swriter.add_summary(_summary, i)
 
 if __name__ == "__main__":
     # set up the config and folders
-    config_name = "cfg64"
-    example_name = "mnist_fcnet_pranam"
-    #config_name = "cfg_s2"
+    config_name = "cfg_t1"
+    example_name = "test_pranam"
+    #config_name = "cfg94"
+    #example_name = "mnist_fcnet_pranam"
+    ##config_name = "cfg_s4"
     #example_name = "schwefel_net_pranam"
+    #config_name = "cfg_a3"
+    #example_name = "mnist_fcnet_adam"
 
     if len(sys.argv) >= 2:
         config_name = sys.argv[1]

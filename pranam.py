@@ -83,14 +83,13 @@ class GradientAccumulator:
             with tf.control_dependencies(assign_zero + assignval_op):
                 step_done = tf.constant(1)
             return step_done
-
-        apply_gradient = tf.cond(remainder, true_fn=_merge_apply_grad, false_fn=_merge_grad)
-        return apply_gradient
+        step = tf.cond(remainder, true_fn=_merge_apply_grad, false_fn=_merge_grad)
+        return step
 
 
 class PranamOptimizer:
-    def __init__(self, sess, func, func_pars, num_clones=16, optimizer=tf.train.AdamOptimizer,learning_rate=1e-5,
-                 batch_size=100, embed_vars=None, embedder=FCEmbedder, embedder_pars=[[None,None]]):
+    def __init__(self, sess, func, func_pars, num_clones, optimizer_params, batch_size=100, embed_vars=None,
+                 embedder_params=FCEmbedder):
 
         # call function num_clones times, and get a loss to optimize
         costs = []
@@ -101,7 +100,7 @@ class PranamOptimizer:
                 costs.append(cost)
                 self.metrics.append(metric)
         cost_mean = tf.reduce_mean(tf.stack(costs,axis=0))
-        optim = optimizer(learning_rate=learning_rate) # todo pass pars
+        optim = optimizer_params[0](*optimizer_params[1:]) # todo pass pars
 
         # sort coupled and decoupled variables
         decoupled_grads = []
@@ -122,7 +121,8 @@ class PranamOptimizer:
                     decoupled_grads.append(grad)
                     decoupled_vars.append(var)
             else:
-                assert not (var_name in embed_vars), "no gradient available for" +str(var_name)
+                if embed_vars is not None:
+                    assert not (var_name in embed_vars), "no gradient available for" +str(var_name)
 
         if embed_vars is not None:
             for vars in coupled_vars:
@@ -132,7 +132,7 @@ class PranamOptimizer:
                 assert len(vars) == len(coupled_vars[0]), "broken embedding, trainable variables of a different length"
 
         # compute the update from the embedding
-        embedding = embedder(sess,coupled_vars,coupled_grads,*embedder_pars)
+        embedding = embedder_params[0](sess, coupled_vars, coupled_grads, *embedder_params[1:])
         embedded_vars, embedding_grads, embedding_vars = embedding.compute_gradients()
 
         # prime the current optimizer with embedding_vars to create lr and momentum Variables
