@@ -10,7 +10,7 @@ class cfg_t1:
         self.out_path = "./results"
         self.sess = tf.Session()
         self.num_steps = 1000
-        self.num_clones = 1
+        self.num_clones = 3
         self.batch_size = 1
 
         # embedding pars
@@ -18,7 +18,8 @@ class cfg_t1:
         embedder = embedders.FCEmbedder
         embedding_shape = [None, None]
         def constant_init(a,partition_info,dtype):
-            return tf.constant([[5, 4, 3, 2, 1]], dtype=dtype)
+            start = [tf.constant([5,4,3,2,1], dtype=dtype) for _ in range(self.num_clones)]
+            return tf.stack(start,axis=0)
         embedding_inits = [constant_init]
         def no_act(x):
             return x

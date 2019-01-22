@@ -91,7 +91,8 @@ class FCEmbedder:
         for grads in gradients:
             input_gradients.append(tf.concat([tf.reshape(g,[-1]) for g in grads],axis=0))
         input_gradients = tf.stack(input_gradients,axis=0)
-        embedding_loss = 0.5 * ((top_layer - tf.stop_gradient(top_layer) + tf.stop_gradient(input_gradients))**2)
+        embedding_loss = (top_layer - tf.stop_gradient(top_layer) + tf.stop_gradient(input_gradients))**2
+        embedding_loss = 0.5 * embed_shape[0] * tf.reduce_sum(embedding_loss)
 
         self.embedding_grads = []
         self.embedding_vars = []
