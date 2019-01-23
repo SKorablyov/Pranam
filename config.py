@@ -12,7 +12,6 @@ class cfg_t1:
         self.num_steps = 1000
         self.num_clones = 3
         self.batch_size = 1
-
         # embedding pars
         self.embed_vars = ["mnist_fcnet/fake_w3:0"]
         embedder = embedders.FCEmbedder
@@ -61,19 +60,18 @@ class cfg_s2:
         self.func = networks.schwefel_net
         self.func_pars = [10]
         self.num_clones = 100
-        self.optimizer = tf.train.GradientDescentOptimizer
-        self.learning_rate = 1e-4 #4e-6
+        self.optimizer_params = [tf.train.GradientDescentOptimizer, 2 * 0.01 * 1e-4] #I am not sure why this is the best
         self.batch_size = 1
         self.num_steps = 20000
         # embedding pars
         self.embed_vars = None
-        self.embedder = embedders.FCEmbedder
+        embedder = embedders.FCEmbedder
         embedding_shape = [None, 250, None]
         embedding_inits = [tf.initializers.variance_scaling(scale=20.0, distribution="uniform"),
                            tf.initializers.variance_scaling(scale=20.0, distribution="uniform")
                            ]
         embedding_acts = [tf.nn.relu,tf.nn.tanh]
-        self.embedder_pars = [embedding_shape,embedding_inits,embedding_acts, None]
+        self.embedder_params = [embedder, embedding_shape,embedding_inits,embedding_acts, None]
 
 
 class cfg_s3:
@@ -86,7 +84,7 @@ class cfg_s3:
         self.func = networks.schwefel_net
         self.func_pars = [10]
         self.num_clones = 100
-        self.optimizer_params = [tf.train.GradientDescentOptimizer, 1e-3]#4e-6
+        self.optimizer_params = [tf.train.GradientDescentOptimizer, 1e-5]#4e-6
         self.batch_size = 1
         self.num_steps = 20000
         # embedding pars

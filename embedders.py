@@ -20,7 +20,7 @@ class FCEmbedder:
     def __init__(self,sess,variables,gradients,embed_shape,initializers,acts,warmup):
         """
         :param variables: 2D array of variables to embed
-        :param gradients: 2D array of gradients for the varibles to embed
+        :param gradients: 2D array of gradients for the variables to embed
         """
         # fixme I am not sure what's the safe way to create variable without a name
         # FIXME: I need to initialize each of the weights separately
@@ -66,8 +66,6 @@ class FCEmbedder:
             init_step = optim.minimize(init_loss)
             sess = tf.Session()
             sess.run(tf.global_variables_initializer())  # fixme! initialize uninitialized!!!!!!
-            #_input_variables = sess.run(input_variables)
-            #print "warmup:", np.var(_input_variables), np.min(_input_variables), np.max(np.abs(_input_variables))
             for i in range(400):
                 print sess.run([init_loss, init_step])
         elif warmup == "rescale":

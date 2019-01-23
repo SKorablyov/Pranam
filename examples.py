@@ -33,12 +33,6 @@ def test_pranam(cfg):
         print "pranam_step:", i, "pranam_cost:", _pranam_cost
 
 
-
-
-
-
-
-
 def schwefel_net_adam(cfg):
     cost, metrics = cfg.func(*cfg.func_pars)
     sess = tf.Session()
@@ -136,12 +130,12 @@ def mnist_fcnet_pranam(cfg):
 
 if __name__ == "__main__":
     # set up the config and folders
-    config_name = "cfg_t1"
-    example_name = "test_pranam"
+    #config_name = "cfg_t1"
+    #example_name = "test_pranam"
     #config_name = "cfg94"
     #example_name = "mnist_fcnet_pranam"
-    ##config_name = "cfg_s4"
-    #example_name = "schwefel_net_pranam"
+    config_name = "cfg_s2"
+    example_name = "schwefel_net_pranam"
     #config_name = "cfg_a3"
     #example_name = "mnist_fcnet_adam"
 

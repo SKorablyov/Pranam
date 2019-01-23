@@ -54,7 +54,6 @@ class GradientAccumulator:
         def _merge_apply_grad(grad_accum=grad_accum, assign_vals=self.assign_vals, optim=self.optim,
                         trainable_vars=self.trainable_vars, b_size=batch_size):
             nvars = len(trainable_vars)
-
             # merge gradient from this batch
             adgrad_ops = []
             for i in range(len(gradients)):
