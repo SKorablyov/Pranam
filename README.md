@@ -1,4 +1,7 @@
 
+# Related work
+https://ai.stanford.edu/~ang/papers/icml11-OptimizationForDeepLearning.pdf
+
 
 # Thoughts
 When my function fits MNIST with a loss of 0 -- that is a completely different situation. I want some likely non-convex function that is heavily underfitting.

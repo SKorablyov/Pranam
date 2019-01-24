@@ -108,3 +108,24 @@ plt.close()
 # ax.legend(["SGD","Pranam-SGD","Adam","Pranam-Adam","RMSProp","Pranam-RMSProp","AdaDelta","Pranam-AdaDelta"])#,prop={'size': 12})
 # plt.savefig(os.path.join(out_path,  "optimizers.png"))
 # plt.close()
+
+
+
+
+# plot some 2d stuff:
+#            fig = plt.figure()
+#            fig.set_size_inches(12.8, 12.8)
+#            ax = fig.gca(projection='3d')
+#            x = np.linspace(-1, 1, 100)
+#            y = np.linspace(-1, 1, 100)
+#            xv, yv = np.meshgrid(x, y)
+#            zv = the_function(torch.from_numpy(np.stack([xv,yv],1))).numpy()
+#            surf = ax.plot_surface(xv,yv, zv,rstride=1, cstride=1, cmap=cm.coolwarm, color='c', alpha=0.3, linewidth=0)
+#            xys = network().detach().numpy()
+#            zs = the_function(network()).detach().numpy()
+#            #print zs
+#            ax.scatter(xys[:,0],xys[:,1],zs,color="k", s=50)
+#            if not os.path.exists(os.path.join(args.save_dir,str(lr))): os.makedirs(os.path.join(args.save_dir,str(lr)))
+#            plt.savefig(os.path.join(args.save_dir,str(lr),"surf_" + str(i) + ".png"))
+#            plt.close()
+
