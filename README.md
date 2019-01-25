@@ -1,6 +1,10 @@
 
 # Related work
-https://ai.stanford.edu/~ang/papers/icml11-OptimizationForDeepLearning.pdf
+http://www.cs.cornell.edu/courses/cs6787/2017fa/Lecture7.pdf
+https://ai.stanford.edu/~ang/papers/icml11-OptimizationForDeepLearning.pdf (benchmark on ConvNet)
+https://ganguli-gang.stanford.edu/pdf/14.SaddlePoint.NIPS.pdf
+http://azadproject.ir/wp-content/uploads/2014/07/2014-iPiano-Inertial-Proximal-Algorithm-for-Nonconvex-Optimization.pdf
+https://arxiv.org/abs/1510.06096
 
 
 # Thoughts
