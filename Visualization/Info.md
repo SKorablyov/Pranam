@@ -18,11 +18,11 @@ Embedding [2,1,1]
   
 Embedding [2,16,1]
 
-   ![[2,16,1]](https://github.com/SKorablyov/MaxProblem/tree/master/Visualization/8.gif)
+ ![[2,16,1]](https://github.com/SKorablyov/MaxProblem/tree/master/Visualization/8.gif)
    
 Embedding [2,256,1]
 
-    ![[2,256,1]](https://github.com/SKorablyov/MaxProblem/tree/master/Visualization/9.gif)
+  ![[2,256,1]](https://github.com/SKorablyov/MaxProblem/tree/master/Visualization/9.gif)
     
 Embedding [4,1,1]
 
@@ -30,11 +30,11 @@ Embedding [4,1,1]
    
 Embedding [4,256,1]
 
- ![[4,256,1]](https://github.com/SKorablyov/MaxProblem/tree/master/Visualization/11.gif)
+ ![4,256,1](https://github.com/SKorablyov/MaxProblem/tree/master/Visualization/11.gif)
  
 Embedding [16,1,1]
 
- ![[16,1,1]](https://github.com/SKorablyov/MaxProblem/tree/master/Visualization/12.gif)
+ ![16,1,1](https://github.com/SKorablyov/MaxProblem/tree/master/Visualization/12.gif)
  
 Embedding [16,16,1]
 
