@@ -1,5 +1,7 @@
 How Pranam Works
-(https://github.com/SKorablyov/MaxProblem/blob/master/Visualization/1-mean_loss.png)
+
+[](https://github.com/SKorablyov/MaxProblem/blob/master/Visualization/1-mean_loss.png)
+
 Embedding [1,1,1] (no embedding)
 
 ![no_emb](https://github.com/SKorablyov/MaxProblem/tree/master/Visualization/3.gif)
