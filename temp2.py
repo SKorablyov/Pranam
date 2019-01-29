@@ -1,47 +1,27 @@
 import tensorflow as tf
 import inputs
 import numpy as np
+import time
 
-b_size =1
-initializers = [tf.contrib.layers.xavier_initializer(),
-                tf.contrib.layers.xavier_initializer(),
-                tf.contrib.layers.xavier_initializer()]
-trainables = [True,True,True]
+# [num_points,depth, point_dim ] 2,16,1
+shape = [2,16,100]
+W1 = tf.get_variable("W1", shape=[shape[0],shape[1]], initializer=tf.ones_initializer(), dtype=tf.float64) / shape[1]
+W2 = tf.get_variable("W2", shape=[shape[1],shape[2]], initializer=tf.ones_initializer(), dtype=tf.float64) / shape[2]
 
-# load dataset and only create one loader for all copies
-if not "mnist_fcnet_loader" in globals().keys():
-    globals()["mnist_fcnet_loader"] = inputs.load_mnist(b_size)
-b_trX, b_trY, b_teX, b_teY = globals()["mnist_fcnet_loader"]
-# initialize variables
-with tf.variable_scope("mnist_fcnet"):
-    w1 = tf.get_variable("w1", shape=[784, 128], initializer=initializers[0], trainable=trainables[0])
-    w2 = tf.get_variable("w2", shape=[128, 64], initializer=initializers[1], trainable=trainables[1])
-    w3 = tf.get_variable("w3", shape=[64, 10], initializer=initializers[2], trainable=trainables[2])
-# build network
-tr_input = tf.reshape(b_trX, [b_size, -1])
-tr_logits = tf.matmul(tf.nn.relu(tf.matmul(tf.nn.relu(tf.matmul(tr_input, w1)), w2)), w3)
+act = tf.matmul(W1,W2)
+cost = tf.reduce_mean(tf.reduce_mean((act - 0.5)**2,axis=1),axis=0)
+
+opt = tf.train.GradientDescentOptimizer(learning_rate=0.01)
+#train_step = opt.minimize(cost)
+grads, vars = zip(*opt.compute_gradients(cost))
+grad_w1 = tf.zeros_like(grads[0]) #* shape[1]
+grad_w2 = grads[1] #* shape[0] #* shape[1] #* shape[2]
+train_step = opt.apply_gradients(zip([grad_w1,grad_w2],vars))
+
 
 sess = tf.Session()
-coord = tf.train.Coordinator()
 sess.run(tf.global_variables_initializer())
-tf.train.start_queue_runners(sess,coord)
-
-# 1280 0.06991143
-# 128 0.12277809, 0.105972305, 0.11091379, 0.10604664
-# 12  0.02434467, 0.029673038, 0.029101579, 0.030923652
-
-# w2: 0.0104190465
-
-# _tlogits = []
-# for i in range(1000):
-#     sess.run(tf.global_variables_initializer())
-#
-#     _tlogit = sess.run(w2)
-#     _tlogits.append(np.reshape(_tlogit,[-1]))
-#
-# _tlogits = np.asarray(_tlogits)
-# print _tlogits
-# print np.mean(_tlogits), np.var(np.reshape(_tlogits,[-1]))
 
 
-print np.var(2*np.array([2,4,9]))
+for i in range(200):
+    print sess.run([(act-0.5)])
