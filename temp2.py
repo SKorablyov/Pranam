@@ -2,7 +2,7 @@ import tensorflow as tf
 import inputs
 import numpy as np
 import time
-
+#in embedding.py
 # [num_points,depth, point_dim ] 2,16,1
 shape = [2,16,100]
 W1 = tf.get_variable("W1", shape=[shape[0],shape[1]], initializer=tf.ones_initializer(), dtype=tf.float64) / shape[1]
