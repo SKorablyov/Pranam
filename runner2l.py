@@ -26,7 +26,7 @@ if __name__ == '__main__':
         counter = 0
         for shape in shapes:
             res =[]
-            for t in range(25):
+            for t in range(2):
                 print t
                 sess = tf.Session()
                 result ,_= calc(shape=shape,lr=lr,sess = sess)
@@ -36,7 +36,9 @@ if __name__ == '__main__':
             np.asarray(res)
             result1 = np.mean(res, axis=0)
             file_name = 'mean_loss_' + str(counter) + '_' + str(lr) + '_.txt'
-            with open(file_name, 'w') as f:
+            my_dir = "./results"
+            fname = os.path.join(my_dir, file_name)
+            with open(fname, 'w') as f:
                 for item in result1:
                     f.write("%s\n" % item)
 
