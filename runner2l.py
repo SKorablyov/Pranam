@@ -29,7 +29,7 @@ if __name__ == '__main__':
             for t in range(25):
                 print t
                 sess = tf.Session()
-                result = calc(shape=shape,lr=lr,sess = sess)
+                result ,_= calc(shape=shape,lr=lr,sess = sess)
                 sess.close()
                 tf.reset_default_graph()
                 res.append(result)

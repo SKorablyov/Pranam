@@ -68,10 +68,12 @@ def calc(shape,lr,sess):
 
     sess.run(tf.global_variables_initializer())
     result = []
+    coords = []
 
     for i in range(2000):
         _, printed_value, _act = sess.run([train_step, cost, act])
         result.append(printed_value)
+        coords.append(act)
         print printed_value#,_act
 
     return result
