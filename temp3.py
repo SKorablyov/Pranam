@@ -76,7 +76,7 @@ def calc(shape,lr,sess):
         coords.append(act)
         print printed_value#,_act
 
-    return result
+    return result,coords
 
 
 
